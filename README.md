@@ -2,5 +2,5 @@
 
 ## Primeros pasos y aviso!
 
-Lo primero que debemos hacer es descargar y descomprimir el archivo zip llamado Admin pro.zip
-**OJO** los diseños que vamos a utilizar solo tienen fines educativos y explicativos. Si desea utilizar los componentes, puede descargar la version gratuita del diseño desde **www.wrappixel.com**.
+Lo primero que debemos hacer es descargar y descomprimir el archivo zip llamado Admin pro.zip  
+**OJO** los diseños que vamos a utilizar solo tienen fines educativos y explicativos. Si desea utilizar los componentes, puede descargar la version gratuita del diseño desde [GitHub Pages](www.wrappixel.com).
