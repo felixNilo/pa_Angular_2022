@@ -1,33 +1,34 @@
 # Programacion de aplicaciones 2022
 
-## Creacion de componentes y estructura de nuestra aplicacion!
+## Desde Admin pro sacaremos las librerias que vamos a utilizar.
 
-Creamos una carpeta llama auth dentro de app. Dentro de esta carpeta tendremos los componentes asociados a los procesos de autenticacion de un usuario.
+Primero debemos ir a nuestra carpeta que descomprimimos en un comienzo. Vamos a la ruta: /Admin pro/
+Estando en Admin pro copiaremos en contenido de la carpeta assets y lo copiaremos en los assets de nuestro proyecto Angular ubicado en /src/assets
 
-### Partamos creando nuestro primer componente llamado login
+### Tambien copiaremos los archivos css y js desde /Admin pro/main/ a nuestros assets del proyecto Angular.
 
-Para crear un componente ingresamos el comando **_ng g c auth/login_** el cual indica a la maquina generar (g) un componente (c) dentro de auth/ llamado login.  
-Esto nos crea 4 archivos dentro de una carpeta login en auth. Un css (estilos del componente), un html (plantilla del componente), un spec.ts (archivo para pruebas del componente) y un ts (controlador del componente). Por ahora solo nos centraremos en la plantilla y el controlador.  
-**Fijese** que en el archivo app.module.ts se ha incorporado el nuevo componente que hemos creado.
+Ojo, muchos de los elementos que hemos copiado no los utilirizaremos.
 
-### Creemos un nuevo componente llamado register \*\*\*
+### Referenciamos las librerias que vamos a utilizar desde el archivo html raiz de nuestro proyecto (index.html)
 
-Al igual que en el caso anterior usaremos el comando ng g c pero agregaremos un metadato al comando para que no cree el archivo de pruebas. **_ng g c auth/register --skip-tests_**
+Vamos a utilizar:
 
-### Ahora creemos algunas paginas para nuestra app
+```
+./assets/images/favicon.png //como un icono
+./assets/css/style.css //como hoja de estilos
+./assets/css/colors/default-dark.css //como hoja de estilos
+./assets/plugins/jquery/jquery.min.js  //como script
+./assets/plugins/bootstrap/js/popper.min.js //como script
+./assets/plugins/bootstrap/js/bootstrap.min.js //como script
+./assets/js/perfect-scrollbar.jquery.min.js //como script
+./assets/js/waves.js //como script
+./assets/js/sidebarmenu.js //como script
+./assets/plugins/sticky-kit-master/dist/sticky-kit.min.js //como script
+./assets/plugins/sparkline/jquery.sparkline.min.js //como script
+./assets/js/custom.min.js //como script
+./assets/plugins/styleswitcher/jQuery.style.switcher.js //como script
+```
 
-Nuevamente usaremos el comando ng g c pero agregaremos un nuevo metadato al comando para que no cree el archivo de estilos. **_ng g c pages/nopagefound --skip-tests --inline-style_**
+### Borramos el contenido html del componente raiz y probamos insertando un header para ver si se ha cargado todo.
 
-### Creemos una pagina para el dashboard
-
-**_ng g c pages/nopagefound --skip-tests --inline-style_**
-
-### Tambien crearemos el componente de breadcrumbs, sidebar y header. Estos deben estar en una carpeta llamada shared
-
-**_ng g c shared/breadcrumbs --skip-tests --inline-style_**  
-**_ng g c shared/sidebar --skip-tests --inline-style_**  
-**_ng g c shared/header --skip-tests --inline-style_**
-
-## Fijese que el componente raiz (app.module.ts) ahora posee mucho texto.
-
-Mas adelante veremos como optimizar la estructura de este componente.
+### Recordar que debemos servir nuestra app **_ng serve -o_**
