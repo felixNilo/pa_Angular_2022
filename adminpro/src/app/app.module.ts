@@ -6,6 +6,9 @@ import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { NopagefoundComponent } from './pages/nopagefound/nopagefound.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { BreadcrumbsComponent } from './shared/breadcrumbs/breadcrumbs.component';
+import { HeaderComponent } from './shared/header/header.component';
+import { SidebarComponent } from './shared/sidebar/sidebar.component';
 
 @NgModule({
   declarations: [
@@ -13,7 +16,10 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
     LoginComponent,
     RegisterComponent,
     NopagefoundComponent,
-    DashboardComponent
+    DashboardComponent,
+    BreadcrumbsComponent,
+    HeaderComponent,
+    SidebarComponent
   ],
   imports: [
     BrowserModule

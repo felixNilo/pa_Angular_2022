@@ -12,3 +12,7 @@ Dentro copiaremos el main wrapper de Admin pro.
 ## Vamos a la plantilla de nuestro header.
 
 Dentro copiaremos el header de clase topbar de Admin pro.
+
+### Llamemos el componente header desde nuestra plantilla raiz.
+
+Esto debe realizarse mediante el selector `<app-header></app-header>`
