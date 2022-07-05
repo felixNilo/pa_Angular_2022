@@ -14,15 +14,13 @@ import { RouterModule } from '@angular/router';
     DashboardComponent,
     ProgressComponent,
     Grafica1Component,
-    PagesComponent,
-    NopagefoundComponent
+    PagesComponent
   ],
   exports: [
     DashboardComponent,
     ProgressComponent,
     Grafica1Component,
-    PagesComponent,
-    NopagefoundComponent
+    PagesComponent
   ],
   imports: [
     CommonModule,

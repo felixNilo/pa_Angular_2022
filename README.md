@@ -33,3 +33,8 @@ Para el punto 1, realizaremos lo mismo que hemos hecho para pages, pero esta vez
 Para el punto 2, debemos importar el enrutador en nuestro modulo de pages. Para ello en los imports incorporemos `app-routing.module.ts`.
 Si nos fijamos, esto ultimo lo estamos importando dos veces. Angular reutiliza el modulo routing que esta en memoria, aunque, podriamos evitar importar el modulo completo dos veces e importar solo el RouterModule de Angular, de esta forma, disminuimos el tiempo de compilacion.
 ````
+
+### Sigamos con el modulo de los componentes de auth
+
+`ng g m auth/auth --flat`  
+Ahora, debemos realizar lo mismo que en el caso anterior con la diferencia que no necesitaremos importar los modulos compartidos ni el router. Si debemos sacar los componentes desde nuestro modulo raiz para importarlos desde el modulo de auth. Luego, en nuestro modulo raiz debemos llamar a estos componentes desde el modulo de auth.
