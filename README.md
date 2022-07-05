@@ -1,42 +1,49 @@
 # Programacion de aplicaciones 2022
 
-## Desde Admin pro sacaremos las clases y bloques que vamos a utilizar.
+## Crearemos las rutas de nuestra aplicacion.
 
-Actualizemos la clase de nuestro body en el index con la clase del body de Admin pro.
-Copiemos el bloque preloader y copiemoslo en el index.
+Desde la consola tipearemos `ng g m appRouting --flat`. Con esto le decimos al cliente Angular que cree un modulo de nombre app-routing (si, la mayuscula la cambia por un guion y la letra en minuscula). Con la etiqueta --flat le indicamos que cree el modulo plano, es decir, al mismo nivel en el que nos encontramos.  
+Vamos a entrar al archivo creado y veremos que se importa un archivo llamado `CommonModule`. Este componente de tipo modulo entrega funcionalidades for, if, while, entre otras, las cuales, para el modulo de rutas no nos va a servir. Dicho esto, eliminamos la linea de codigo que importa dicho modulo. Con ello, tambien debemos dejar vacio el arreglo `imports`.
 
-## Vamos a la plantilla raiz de nuestra app.
+### Llamemos a nuestros componentes.
 
-Dentro copiaremos el main wrapper de Admin pro.
+Para eso, debemos importar RouterModule desde @angular/router.  
+`import {RouterModule} from '@angular/router';`
+Ademas, debemos crear un arreglo routes, de tipo Routes que contendra todas nuestras paginas.
 
-## Vamos a la plantilla de nuestro header.
+```const routes:Routes = [
+    {path: 'dashboard', component: DashboardComponent},
+    (...) // Agregar todos los componentes que tenemos hasta ahora.
+]
+```
 
-Dentro copiaremos el header de clase topbar de Admin pro.
+Fijese que cada vez que llamamos a un componente, el sistema nos importa de forma automatica el componente que estamos llamando.
 
-### Llamemos el componente header desde nuestra plantilla raiz.###
+### Redireccionemos al dashboard si la ruta esta vacia y si es que la ruta es cualquier otra cosa que no este especificada en routes que nos envie al componente NoPageFound.
 
-Esto debe realizarse mediante el selector `<app-header></app-header>`  
-Si nos fijamos, hay algunos iconos que no funcionan. Eso es porque algunos iconos del template se basan es SCSS. Entonces, copiaremos esta carpeta dentro de nuestro assets.  
-Ojo, las clases que estamos utilizando provienen de bootstrap, asi es que esa libreria tambien debemos tenerla enlazada en nuestro index.  
-Otro aspecto importante es tener en cuenta que las imagenes que estamos enlazando desde nuestras plantillas llaman a nuestro archivos en assets, por que lo que las rutas deben ser actualizadas.
+Para ello debemos usar la siguiente sintaxis
+` {path:'', redirectTo: '/dashboard', pathMatch: 'full'}, {path:'**', component: NopagefoundComponent},`
 
-### Actualicemos las animaciones que tienen nuestros elementos HTML.
+## Nuevas paginas para experimentar.
 
-Para eso, debemos cambiar algunas de las clases de nuestros elementos. Fijese en la clase del elemento que aparece en pantalla al hacer click sobre el icono de mensajes. Al final de la clase de dicho elemento esta el llamado a la clase **_bounceInDown_**. Esto lo cambiaremos por **_fadeIn_**.  
-Haremos lo mismo con la animacion del elemento que muestra la informacion del usuario.  
-Por ahora no vamos a utilizar el carrusel con el formulario de contacto, asi es que lo sacaremos. Para eso, debes eliminar de la plantilla header el bloque del mega menu.
+Creemos dos nuevos componentes para agregar a nuestras rutas. Uno de una barra de progreso y otro para alguna grafica.
+**_ ng g c pages/progress --skip-tests --inline-style _**
+**_ ng g c pages/grafica1 --skip-tests --inline-style _**
+Agregemos estos componentes a las rutas de nuestro arreglo.
 
-### Ahora vamos al sidebar. Realizaremos el mismo procedimiento anterior.
+## Usemos estas rutas con el componente Router de Angular y exportemoslo a nuestro proyecto.
 
-Pero esta vez con el bloque `<aside></aside>`. Recuerde que debe llamar al selector del componente sidebar en la plantilla del componente raiz.  
-En el sidebar solo dejaremos el bloque del usuario activo, y el bloque del dashboard. Todo los demas items de la lista los borraremos.
+Para ello, en la sentencia imports debemos entregarle a nuestro modulo de rutas de angular nuestro arreglo de rutas mediante el siguiente codigo:
+`RouterModule.forRoot(routes) ///Para cargar rutas raiz. Mas adelante veremos el uso de forChild`
+Ademas, debemos crear una nueva llave en nuestro modulo de angular llamado exports para exportar el modulo con las rutas cargadas.
 
-### Finalmente, vamos con el breadcrumbs y el contenido de la aplicacion.
+## Llamemos a nuestro modulo de rutas en nuestro modulo de la aplicacion.
 
-Tal como en nuestra plantilla base de Admin pro, vamos a dejar un contenedor de clase `page-wrapper` dentro de otro contenedor de clase `container-fluid`. Dentro de estos vamos a llamar a nuestro componente breadcrumbs, el cual tambien debemos preparar.  
-Para ello, al igual que los casos anteriores, extraimos el breadcrumbs de la plantilla Admin pro y lo situamos en la plantilla del componente breadcrumbs.
+Para ello, solo debemos incluir en el import el elemento que estamos exportando en nuestro modulo de rutas: `AppRoutingModule`. Ya ordenaremos la estructura de nuestro modulo de la aplicacion, ya que, como ven, posee gran cantidad de lineas y se torna dificil de leer.
 
-### Hasta este punto deberiamos tener nuestra estructura casi lista.
+Hasta aqui deberiamos tener nuestro sistema corriendo pero sin renderizar los componentes.
+Para eso, debemos usar la etiqueta `<router-outlet></router-outlet>` en nuestra plantilla de la aplicacion.
 
-Copiaremos el contenedor de contenido de clase `row` de nuestra plantilla base. Dentro de este contenedor estara el contenido de nuestra aplicacion.
-Y ademas, copiaremos el footer para ponerlo al final de nuestro contenido.
+### Recuerdan que cuando creamos la aplicacion con ng new, el cliente nos pregunto si vamos a usar routing?
+
+Si hubieramos puesto que si, nos hubiera creado un archivo de rutas de forma automatica.
