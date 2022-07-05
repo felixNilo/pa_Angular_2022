@@ -10,7 +10,8 @@ Dentro de este archivo, en el bloque de declaraciones, importaremos nuestros com
 
 ```
 declarations: [ DashboardComponent, ProgressComponent, Grafica1Component, PagesComponent ],
-exports: [ DashboardComponent, ProgressComponent, Grafica1Component, PagesComponent ], imports: [ CommonModule ]
+exports: [ DashboardComponent, ProgressComponent, Grafica1Component, PagesComponent ],
+imports: [ CommonModule ]
 ```
 
 Ahora, usaremos este modulo de componentes en nuestro modulo raiz, para ello, solo debemos llamar al modulo en los imports y sacar los componentes que ya no se deberian volver a llamar en app.module
