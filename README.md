@@ -16,3 +16,12 @@ Para eso, sobreescribiremos la duracion de las animaciones. Primero, buscaremos 
 Veremos que dentro de el, hace uso del archivo `animate.css`. Si vamos a este archivo, veremos todas las animaciones de nuestro sistema. Nos centraremos en la primera declaracion css dada por: `.animated{-webkit-animation-duration:1s;animation-duration:1s;-webkit-animation-fill-mode:both;animation-fill-mode:both}`  
 Ahora, podriamos modificar esta declaracion, o bien, podriamos una nueva declaracion de estilos en nuestro css global style.css en la raiz de nuestra aplicacion.
 En este commit realizaremos ambas, se ha creado una nueva declaracion de nombre fast (que no vamos a usar) y cambiamos el tiempo de duracion de animaciones en animate.css
+
+## Aprovechemos de realizar la pagina nopagefound
+
+Debemos realizar lo mismo que en los dos casos anteriores:
+
+1. Extraer el wrapper principal de la pagina pages-error404.html y copiarlo en nuestra plantilla del componente nopagefound
+2. Extraer la hoja de estilos de la pagina pages-error404.html y copiar el contenido en el estilo del componente nopagefound.
+3. En el caso que el componente no tenga estilo, debe crear el archivo nopagefound.component.css e importar el archivo en el controlador .ts del componente como una url de estilos.  
+   Fijese que el boton que posee esta pagina redirecciona a una pagina index.html, si bien, esto funciona ya que debido a nuestro router, llegamos al dashboard, esto podria funcionar de forma mas precisa.
