@@ -1,20 +1,8 @@
-# Programacion de aplicaciones 2022
-
-## Ordenaremos nuestro app.routing
-
-Si nos fijamos tenemos bastantes rutas, y podriamos tener mas. Por eso, empaquetaremos las rutas de pages.
-Primero, crearemos un arhivo de rutas para nuestras paginas.
-
-### Cree un archivo de nombre pages.routing.ts dentro de pages
-
-Este archivo debe ser muy similar a la base de app.routing:
-
-```
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { Grafica1Component } from './grafica1/grafica1.component';
-import { PagesComponent } from './pages.component';s
+import { PagesComponent } from './pages.component';
 import { ProgressComponent } from './progress/progress.component';
 
 const routes: Routes = [
@@ -35,8 +23,3 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class PagesRoutingModule {}
-```
-
-### Importemos este pages.routing en nuestro app-routing
-
-Para ello, simplemente, en nuestros imports del modulo debemos importar PagesRoutingModule.
