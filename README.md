@@ -1,249 +1,50 @@
 # Programacion de aplicaciones 2022
 
-## Trabajaremos con el componente Progress.
-
-Primero, modificaremos la forma en que se renderiza la aplicacion.
-En nuestra plantilla de paginas dejaremos solo el router-outlet, ya que los contenedores seran renderizados por los propios componentes.  
-De esta forma, nuestra plantilla html de pages quedaria:
+## Supongamos que tenemos dos barras de progreso.
 
 ```
-<div id="main-wrapper">
-  <app-header></app-header>
-  <app-sidebar></app-sidebar>
-  <div class="page-wrapper">
-    <div class="container-fluid">
-      <app-breadcrumbs></app-breadcrumbs>
-      <!-- Comienzo del sistema de rutas -->
-      <router-outlet></router-outlet>
-      <!-- Fin del sistema de rutas -->
-      <!-- footer -->
-      <!-- ============================================================== -->
-      <footer class="footer"> © 2022 Programacion de aplicaciones </footer>
-      <!-- ============================================================== -->
-      <!-- End footer -->
-    </div>
-  </div>
-</div>
-```
-
-Mientras que nuestra plantilla de progress quedaria:
-
-```
-<div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-body">
-          Progress work
-        </div>
-      </div>
-    </div>
-  </div>
-```
-
-### Extraigamos nuestras barras de progreso desde nuestra plantilla base de admin pro.
-
-Busquemos el archivo llamado ui-progressbar.html  
-Dentro de el podremos ver que se llama a un archivo de estilos en especifico. (Esto ya se ha visto).
-Como en ramas anteriores, extraigamos dicho CSS, creemos el archivo de estilos de componente, importemoslo y hagamos uso de los estilos con algun bloque de nuestra plantilla.  
-Usaremos una barra de progreso desde nuestra plantilla de admin pro. El codigo de nuestra plantilla de progress deberia quedar de esta forma:
-
-```
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Striped Progress bar</h4>
-                <div class="progress m-t-20">
-                    <div class="progress-bar bg-info progress-bar-striped active" aria-valuenow="85" aria-valuemin="0"
-                        aria-valuemax="100" style="width: 85%; height:10px;" role="progressbar"> <span
-                            class="sr-only">85% Complete (success)</span> </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-```
-
-Ademas, vamos a la plantilla form-basic.html y busquemos un input con dos botones en el extremo para agregarlo a nuestra plantilla de pages. Importante, queremos que este input este en el primer espacio de una fila de dos columnas de igual tamaño. Para ello, debemos agregar una nueva fila en nuestra plantilla y dos columnas de tamaño 6.
-
-```
-<div class="row">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body">
-                Una columna
-            </div>
-        </div>
-    </div>
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body">
-                Otra columna
-            </div>
-        </div>
-    </div>
-</div>
-```
-
-Dentro de la primera columna, pegaremos el elemento de la plantilla base form-basic.html
-
-```
-<div class="row">
-  <div class="col-6">
-    <div class="card">
-      <div class="card-body">
-        <div class="input-group">
-          <span class="input-group-btn">
-            <button class="btn btn-danger" type="button">Hate it</button>
-          </span>
-          <input type="text" class="form-control" placeholder="Product name" />
-          <span class="input-group-btn">
-            <button class="btn btn-success" type="button">Love it</button>
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-6">
-    <div class="card">
-      <div class="card-body">Otra columna</div>
-    </div>
-  </div>
-</div>
-```
-
-Cambiemos los atributos class de los botones dejando los dos como primary, y los textos de los botones; uno lo reemplazaremos por un icono de clase fa fa-minus y el otro por un icono de clase fa fa-plus
-
-```<div class="input-group">
-          <span class="input-group-btn">
-            <button class="btn btn-primary" type="button">
-              <i class="fa fa-minus"></i>
-            </button>
-          </span>
-          <input type="text" class="form-control" placeholder="Product name" />
-          <span class="input-group-btn">
-            <button class="btn btn-primary" type="button">
-              <i class="fa fa-plus"></i>
-            </button>
-          </span>
-        </div>
-```
-
-## Juguemos con el porcentaje de la aplicacion.
-
-Podriamos cambiar el porcentaje mediante la modificacion del atributo style de la barra de progreso.
-Intuitivamente, podriamos cambiar el valor de % del style. Esto tambien puede ser enviado desde el controlador de nuestro componente.  
-Si en nuestro export inicializamos una variable de tipo numero llamado progreso y la llamamos en el codigo mediante dobles llaves podriamos utilizar esa variable pero el codigo es un poco complicado de leer. Asi quedaria el export de nuestro controlador del componente progress (sacamos la funcion OnInit ya que no la vamos a usar aun):
-
-```
-export class ProgressComponent {
-  progreso: number = 40;
-}
-
-```
-
-y asi podria quedar el elemento de la barra de progreso.
-
-```
+        <div class="progress m-t-20">
           <div
-            class="progress-bar bg-info progress-bar-striped active"
-            style="width: {{ progreso }}%; height: 10px"
+            class="progress-bar bg-primary progress-bar-striped active"
+            style="height: 10px"
+            [style.width]="getPorcentaje"
             role="progressbar"
-          >
-          </div>
-```
-
-Tambien podria ser:
-
-```
+          ></div>
+        </div>
+        <div class="progress m-t-20">
           <div
             class="progress-bar bg-info progress-bar-striped active"
             style="height: 10px"
-            [style.width]="progreso + '%'"
+            [style.width]="getPorcentaje"
             role="progressbar"
           ></div>
 ```
 
-Ambos casos funcionan aunque, en el primer caso, el editor nos podria generar alertas por posibles inconsistencias en el codigo, mientras que en el segundo caso, estamos trabajando con strings. De esta forma, este string podria ser devuelto por una funcion con el simbolo de % desde el export. Entonces, el export podria ser:
+Si quisieramos tener un nuevo incrementador, deberiamos copiar el codigo de la plantilla. Entonces, podriamos separar la logica del incrementador en un nuevo componente.
+
+## Entonces, creemos un modulo dentro de una carpeta componentes.
+
+Este modulo se ocupara de importar y exportar los componentes que vamos a reutilizar en nuestra aplicacion.
+
+`ng g m components/components --flat`
+
+Luego, generaremos el componente del incrementador dentro de la carpeta componentes.
+
+`ng g c components/incrementador --skip-tests --inline-style`
+
+Ya que el modulo de componentes es el que se ocupa de entregar los componentes que se reutilizan, debemos exportar al componente Incrementador.
 
 ```
-export class ProgressComponent {
-  progreso: number = 90;
-
-  get getPorcentaje() {
-    return `${this.progreso}%`;
-  }
-}
+@NgModule({
+  declarations: [IncrementadorComponent],
+  exports: [IncrementadorComponent],
+  imports: [CommonModule],
+})
 ```
 
-Ahora, desde la plantilla de progress llamamos a la funcion `[style.width]="getPorcentaje"`
+### Importemos el modulo de componentes en donde lo vamos a necesitar (pages)
 
-### Vamos con los botones.
-
-Creemos una funcion que reciba un numero y actualice el valor de la variable progreso:
-
-```
-cambiarValor(valor:number){
-  return this.progreso = this.progreso + valor;
-}
-```
-
-Ahora, en angular existe el atributo `(click)` para los elementos html. De esta forma, para el boton de menos, el atributo click llamara a la funcion cambiar entregandole un valor de -x, donde x podria ser un numero arbitrario. Probemos con 5!
-
-```
-<div class="input-group">
-          <span class="input-group-btn">
-            <button
-              class="btn btn-primary"
-              type="button"
-              (click)="cambiarValor(-5)"
-            >
-              <i class="fa fa-minus"></i>
-            </button>
-          </span>
-          <input type="text" class="form-control" placeholder="Product name" />
-          <span class="input-group-btn">
-            <button
-              class="btn btn-primary"
-              type="button"
-              (click)="cambiarValor(5)"
-            >
-              <i class="fa fa-plus"></i>
-            </button>
-          </span>
-        </div>
-```
-
-El unico problema que tenemos es que, cuando hacemos muchos click en algun boton, progreso se pasa de los limites (-100 y 100). Esto lo puede verificar haciendo un logeo por consola del valor de progreso luego de actualizarlo `console.log(this.progreso)`. Como sabemos, hay muchas formas de arreglar esto. Hemos usado la siguiente forma, aunque, es recomendable, que a modo de ejercicio, busquen otra manera de realizar la validacion...
-
-```
-cambiarValor(valor: number) {
-    if (this.progreso >= 100 && valor >= 0) {
-      return (this.progreso = 100);
-    }
-    if (this.progreso <= 0 && valor <= 0) {
-      return (this.progreso = 0);
-    }
-    return (this.progreso = this.progreso + valor);
-  }
-```
-
-### Vamos con el elemento input.
-
-En angular, existe una etiqueta de tipo funcion para plantillas que permite sincronizar elementos del controlador con la plantilla. Aunque, para eso, debemos importar el modulo de formularios de Angular.
-Para ello, primero, generemos el llamado de la etiqueta tipo funcion desde la plantilla en el elemento input:
-
-```
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Progreso"
-            [(ngModel)]="progreso"
-          />
-```
-
-Esto generara un error ya que no hemos importado el modulo de formularios de Angular para que pueda hacer uso de funcion de sincronizar los valores. Entonces, vamos al modulo de pages para importar FormModule desde Angular:
+Entonces, vamos al modulo de pages e importemos el modulo de components
 
 ```
   imports: [
@@ -252,5 +53,109 @@ Esto generara un error ya que no hemos importado el modulo de formularios de Ang
     RouterModule,
     //AppRoutingModule,
     SharedModule,
+    ComponentsModule,
   ],
 ```
+
+La aplicacion deberia estar funcionando tal cual...
+Ahora, sacaremos el codigo del incrementador de nuestra plantilla de progress para dejarlo en la plantilla del incrementador. Luego, ya podemos llamar al componente incrementador mediante su selector `<app-incrementador></app-incrementador>` desde la plantilla de progress.
+Hasta aqui, al compilar tendremos varios errores:
+
+1. El componente incrementador esta haciendo uso de funciones que antes estaban en progress.
+2. Desde el incrementador estamos llamando a etiquetas de funciones sin tener importado el FormModule de Angular.
+
+Entonces, para el punto 1. moveremos las funciones del controlador de progress al controlador del incrementador, esto traera un error del elemento de barra de progreso de la plantilla, asi es que comentaremos esa linea por ahora.
+Para el punto 2. importaremos FormModule en nuestro modulo de componentes.
+
+Ahora, podriamos utilizar el componente incrementador las veces que queramos desde nuestro progress.
+
+```
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-body">
+        <app-incrementador></app-incrementador>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-body">
+        <app-incrementador></app-incrementador>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+## Ahora debemos comunicar el componente hijo (incrementador) con el componente page (progress)
+
+### Primero intentemos pasar el valor de progreso desde al padre al hijo.
+
+Para ello, solo debemos hacer uso de lo que en Angular se llama @Input.
+De esta forma, la variable progreso sera inicializada como un @Input:
+`@Input() progreso: number = 90;`.  
+Con esto, desde progress, al momento de llamar al componente incrementador, podemos pasarle un valor para el valor progreso de la siguiente forma:
+`<app-incrementador [progreso]="15"></app-incrementador>`  
+Fijese que si no se le da ningun valor a esta variable input, esta se inicializa como se indica en el controlador del componente.  
+Esto tambien se puede hacer con algun otro nombre... Por ejemplo, si inicializamos la variable progreso de la siguiente forma:
+``@Input('otro_nombre') progreso: number = 90;`.  
+En ese caso, debemos enviar desde el padre un valor para el identificador otro_nombre
+`<app-incrementador [otro_nombre]="15"></app-incrementador>`
+
+### Pasemos a entregar un valor desde el hijo al padre.
+
+Para ello, utilizaremos @Output, el cual para Angular, es un evento.
+Tenga en cuenta que debemos instanciar este evento con un nombre y un valor. Para ello, escribiremos la siguiente linea de codigo, luego de instanciar la variable progreso: `@Output() valorSalida: EventEmitter<number> = new EventEmitter();`
+Ya que tenemos la variable que emite un valor de tipo number, podemos emitir dicho valor luego de actualizar el valor de progreso:
+`this.valorSalida.emit(x)` donde x es el numero que queremos emitir.
+
+Si vamos a nuestra aplicacion, pareciera ser que aun nada ha cambiado, pero en realidad, cada vez que actualizamos el valor de progreso, el valor se esta enviando al padre. Para recibir el valor, debemos llamar al evento desde el selector del componente mediante la siguiente sintaxis:
+`<app-incrementador (nombre_del_emisor)="accion_a_realizar" [progreso]="15"></app-incrementador>` donde nombre_del_emisor es el identificador de la variable que esta emitiendo, y accion_a_realizar es la accion que se va a realizar tras ocurrir el evento @Output.
+
+### Creemos un receptor para nuestro emisor.
+
+En nuestro controlador de progreso, creemos una funcion llamada cambioValorHijo() que nos avise por consola que algo esta se esta recibiendo.
+
+```
+export class ProgressComponent {
+  cambioValorHijo() {
+    console.log('Recibo');
+  }
+}
+```
+
+De esta forma, nuestro selector quedaria de la siguiente forma: `<app-incrementador (valorSalida)="cambioValorHijo()" [progreso]="15"></app-incrementador>`
+
+Ahora, pasemos el valor numerico. Para ello, simplemente debemos agregar un atributo numerico al crear la funcion de recepcion del evento, y cuando llamemos a la funcion en el selector, debemos entregar la etiqueta `$event`.  
+Selector:
+`<app-incrementador (valorSalida)="cambioValorHijo($event)" [progreso]="15"></app-incrementador`
+Funcion receptor:
+
+```cambioValorHijo(valor: number) {
+    console.log('Recibo ', valor);
+  }
+```
+
+Ya deberiamos poder recibir el valor.
+
+### Ahora conectemos el valor recibido con la barra de progreso.
+
+Primero, en nuestro controlador de progress, creemos las variables y funciones para entregar el progreso de las barras:
+
+```
+ progreso1: number = 25;
+  progreso2: number = 75;
+
+  get getProgreso1(){
+    return `${this.progreso1}%`
+  }
+
+  get getProgreso2(){
+    return `${this.progreso2}%`
+  }
+```
+
+Ahora, en nuestro selector, en vez de llamar a la funcion `cambioValorHijo`, directamente modificaremos el valor de progreso1 o progreso2 dependiendo del selector:`(valorSalida)="progreso1 = $event"`.
+Recuerda que el valor que estamos comunicando al hijo ya no es 15, sino que es progreso1.
+Finalmente, debemos mostrar el progreso en la barra, por lo que descomentaremos el codigo que habiamos comentado anteriormente y llamaremos a las funciones getProgreso1 y getProgreso2.

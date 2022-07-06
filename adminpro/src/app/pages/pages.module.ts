@@ -8,6 +8,7 @@ import { SharedModule } from '../shared/shared.module';
 import { NopagefoundComponent } from './nopagefound/nopagefound.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ComponentsModule } from '../components/components.module';
 //import { AppRoutingModule } from '../app-routing.module';
 
 @NgModule({
@@ -29,6 +30,7 @@ import { FormsModule } from '@angular/forms';
     RouterModule,
     //AppRoutingModule,
     SharedModule,
+    ComponentsModule,
   ],
 })
 export class PagesModule {}

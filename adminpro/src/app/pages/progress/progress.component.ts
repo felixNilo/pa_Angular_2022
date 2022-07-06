@@ -6,19 +6,18 @@ import { Component } from '@angular/core';
   styleUrls: ['./progress.component.css'],
 })
 export class ProgressComponent {
-  progreso: number = 90;
+  progreso1: number = 25;
+  progreso2: number = 75;
 
-  get getPorcentaje() {
-    return `${this.progreso}%`;
+  get getProgreso1() {
+    return `${this.progreso1}%`;
   }
 
-  cambiarValor(valor: number) {
-    if (this.progreso >= 100 && valor >= 0) {
-      return (this.progreso = 100);
-    }
-    if (this.progreso <= 0 && valor <= 0) {
-      return (this.progreso = 0);
-    }
-    return (this.progreso = this.progreso + valor);
+  get getProgreso2() {
+    return `${this.progreso2}%`;
+  }
+
+  cambioValorHijo(valor: number) {
+    console.log('Recibo ', valor);
   }
 }
