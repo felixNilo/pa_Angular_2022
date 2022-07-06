@@ -40,3 +40,29 @@ export class PagesRoutingModule {}
 ### Importemos este pages.routing en nuestro app-routing
 
 Para ello, simplemente, en nuestros imports del modulo debemos importar PagesRoutingModule.
+
+## Realizaremos lo mismo pero para las rutas de auth.
+
+De esta forma, creemos un archivo de rutas auth.routing.ts dentro de la carpeta auth. Este debe contener:
+
+```
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+
+const routes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class AuthRoutingModule {}
+```
+
+### Finalmente, un recordatorio.
+
+Dejemos documentadas las rutas en nuestro app.routing de manera de dejar claro como estan estructuradas las rutas de la aplicacion.
