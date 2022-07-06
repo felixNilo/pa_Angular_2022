@@ -1,68 +1,12 @@
 # Programacion de aplicaciones 2022
 
-## Ordenaremos nuestro app.routing
+## Configuraremos nuestro routing para nuestras pages.
 
-Si nos fijamos tenemos bastantes rutas, y podriamos tener mas. Por eso, empaquetaremos las rutas de pages.
-Primero, crearemos un arhivo de rutas para nuestras paginas.
+Queremos que nuestro dashboard sea la ruta principal, luego deben venir las rutas progress y grafica1.
 
-### Cree un archivo de nombre pages.routing.ts dentro de pages
+Para ello, simplemente debemos setear la ruta padre como `'path: 'dashboard'`.
+Y ademas, redireccionemos al dashboard al ingresar una ruta vacia en nuestro app.routing.
 
-Este archivo debe ser muy similar a la base de app.routing:
+## Finalmente, agregemos un tag a nuestro push en git para documentar la version de la aplicacion.
 
-```
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { Grafica1Component } from './grafica1/grafica1.component';
-import { PagesComponent } from './pages.component';s
-import { ProgressComponent } from './progress/progress.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: PagesComponent,
-    children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'progress', component: ProgressComponent },
-      { path: 'grafica1', component: Grafica1Component },
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-    ],
-  },
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class PagesRoutingModule {}
-```
-
-### Importemos este pages.routing en nuestro app-routing
-
-Para ello, simplemente, en nuestros imports del modulo debemos importar PagesRoutingModule.
-
-## Realizaremos lo mismo pero para las rutas de auth.
-
-De esta forma, creemos un archivo de rutas auth.routing.ts dentro de la carpeta auth. Este debe contener:
-
-```
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LoginComponent } from './login/login.component';
-import { RegisterComponent } from './register/register.component';
-
-const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class AuthRoutingModule {}
-```
-
-### Finalmente, un recordatorio.
-
-Dejemos documentadas las rutas en nuestro app.routing de manera de dejar claro como estan estructuradas las rutas de la aplicacion.
+Para ello, ingresemos por consola `git tag -a v1.1 -m "Rutas listas"`
