@@ -7,6 +7,7 @@ import { PagesComponent } from './pages.component';
 import { SharedModule } from '../shared/shared.module';
 import { NopagefoundComponent } from './nopagefound/nopagefound.component';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 //import { AppRoutingModule } from '../app-routing.module';
 
 @NgModule({
@@ -14,19 +15,20 @@ import { RouterModule } from '@angular/router';
     DashboardComponent,
     ProgressComponent,
     Grafica1Component,
-    PagesComponent
+    PagesComponent,
   ],
   exports: [
     DashboardComponent,
     ProgressComponent,
     Grafica1Component,
-    PagesComponent
+    PagesComponent,
   ],
   imports: [
+    FormsModule,
     CommonModule,
     RouterModule,
     //AppRoutingModule,
-    SharedModule
-  ]
+    SharedModule,
+  ],
 })
-export class PagesModule { }
+export class PagesModule {}
