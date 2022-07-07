@@ -9,6 +9,7 @@ import { NopagefoundComponent } from './nopagefound/nopagefound.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ComponentsModule } from '../components/components.module';
+import { NgChartsModule } from 'ng2-charts';
 //import { AppRoutingModule } from '../app-routing.module';
 
 @NgModule({
@@ -31,6 +32,7 @@ import { ComponentsModule } from '../components/components.module';
     //AppRoutingModule,
     SharedModule,
     ComponentsModule,
+    NgChartsModule,
   ],
 })
 export class PagesModule {}
