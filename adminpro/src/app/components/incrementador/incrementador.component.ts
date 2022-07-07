@@ -22,4 +22,16 @@ export class IncrementadorComponent {
     this.valorSalida.emit(this.progreso + valor);
     return (this.progreso = this.progreso + valor);
   }
+
+  onChange(valor: number) {
+    //console.log(valor);
+    if (valor >= 100) {
+      this.progreso = 100;
+    } else if (valor <= 0) {
+      this.progreso = 0;
+    } else {
+      this.progreso = valor;
+    }
+    this.valorSalida.emit(this.progreso);
+  }
 }
