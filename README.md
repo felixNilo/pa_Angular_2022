@@ -1,102 +1,143 @@
 # Programacion de aplicaciones 2022
 
-## Sigamos trabajando con el sidebar.
+## Que son los observables y las promesas
 
-Esta vez, revisaremos un problema comun con el que un desarrollador se puede encontrar mientras utiliza el framework Angular.  
-Primero vamos a conectar nuestro sidebar con el componente login.
-Para ello, al seleccionar logout desde el sidebar, redireccionaremos al componente login `<li><a routerLink="/login">Logout</a></li>`
-Esto lo haremos tambien en el header
+Son propiedades de estado de procesos. Sirven para trabajar con procesos asincronos, es decir, que no hay tiempo determinado entre la respuesta y la peticion.
 
-```<li>
-                <a routerLink="/login"
-                  ><i class="fa fa-power-off"></i> Logout</a
-                >
-              </li>
+### Las promesas
 
-```
+Trabajan con un unico flujo de datos, se usan con una unica data asincrona de respuesta y no es simple de cancelar.
+Una promesa, pasa desde una sentencia de codigo, luego, pasa a una sentencia `then` y luego, un `resolve` o un `reject`.
 
-### Desde nuestro login, redireccionemos al dashboard
+### Los observables
 
-Primero, vemos que el tipo de boton que posee el formulario es submit, por lo que agregamos a nuestra etiqueta form el atributo `(submit)` el cual llamara a un metodo para dar respuesta al momento de hacer submit.
+Trabajan con un flujo continuo de datos, al fallar, se puede reintentar ejectura el observable.
+Un observable, pasa por una sentencia de codigo, luego puede pasar por eventos, sentencias para cancelar la operacion, reintentar, filtrar, o incluso hacer un ciclo infinito.
 
-```
-  login() {
-    console.log('soy submit');
-  }
-```
+## Partamos ejercitando con promesas
 
-Aun no funciona, ya que recuerden que estamos interactuando con un formulario, lo cual requiere el modulo de formulario para Angular, por lo que debemos importar el modulo en nuestro modulo de autenticacion.
-`imports: [CommonModule, FormsModule],`
+Creemos un componente dentro de pages de nombre promesas `ng g c pages/promesas --skip-tests --inline-style`  
+Agreguemos una ruta para renderizar al componente (en **_pages.routing.ts_**).
 
-Hasta aqui, si deberiamos poder ver nuestra respuesta por consola al presionar el boton submit.
+Ademas, agregemos un enlace desde el menu (en **_sidebar.service.ts_**).
 
-### Redireccionemos al dashboard
-
-Para ello, solo debemos utilizar la funcion navigateByUrl de router, el cual proviene del modulo Router de Angular, entonces, tambien debemos importar este modulo antes de usar la funcion. `imports: [CommonModule, FormsModule, RouterModule],`
-
-Ahora, utilizaremos el constructor del componente login para crear una variable de tipo Router, de manera de que podamos utilizarla en la funcion login, de esta forma el controlador del componente quedaria de esta forma:
+Ahora, creemos una promesa en el controlador del componente promesa.
+Recuerde que una promesa **debe** contener al menos una sentencia. Es decir, que si creamos la promesa sin sentencia, nos generara un error.  
+Dicho esto, creemos la funcion dentro del ngOnInit()
 
 ```
-export class LoginComponent implements OnInit {
-  constructor(private router: Router) {}
-
-  ngOnInit(): void {}
-
-  login() {
-    this.router.navigateByUrl('/');
-  }
-}
-```
-
-Fijese que al momento de entrar al dashboard nuevamente, el footer de nuestra pagina no se ve correctamente. Esto ocurre debido a que Angular al inicializar la aplicacion, ejecuta los scripts javascript una vez, y al momento de cambiar de vista no lo vuelve a ejecutar hasta que se solicite una nueva plantilla o que cambie la resolucion de la pantalla.
-Para solucionar esto, modificaremos el script javascript que realiza la funcion que personaliza los elementos html.
-
-### Vamos a la plantilla index de nuestra app
-
-Desde aqui, busquemos el archivo que hace uso de custom.min.js
-Lo que haremos es basicamente llamar a la funcion de custom.min.js al momento de cargar el componente del dashboard.  
-Primero, dentro del archivo script, empaquetaremos la funcion dentro de una nueva funcion de nombre `customInitFunctions`.
-
-```
-const customInitFuncions = () => {
-  ...(todo lo que contenia custom.min.js)
-}
-```
-
-Esta funcion debe llamarse a su misma al final del script ya que solo hemos instanciado la funcion, hacer falta invocarla.
-
-```
-const customInitFunctions = () => {
-  ...(todo lo que contenia custom.min.js)
-}
-
-customInitFunctions()
-```
-
-Solo hace falta invocarla desde nuestra aplicacion.
-
-### Invoquemos customInitFunctions()
-
-Ya que al ingresar desde el login, entramos a un componente pages, llamaremos la funcion desde el controlador de pages al momento de inicializar el componente, es decir, dentro del `ngOnInit()`.
-**OJO**, Angular no reconocera esta funcion ya que viene desde un archivo externo al core de Angular, asi es que debemos declarar esta funcion al comienzo del componente e indicar que la funcion no retorna nada.
-
-```
-import { Component, OnInit } from '@angular/core';
-
-declare function customInitFunction(): void;
-
-@Component({
-  selector: 'app-pages',
-  templateUrl: './pages.component.html',
-  styles: [],
-})
-export class PagesComponent implements OnInit {
-  constructor() {}
-
   ngOnInit(): void {
-    customInitFunction();
+
+    const promesa = new Promise(()=>{
+      console.log('Hola Mundo');
+    });
+
+    console.log('fin del Init')
   }
+```
+
+Si se fijan, con esto, el codigo corre de forma sincrona, es decir, todo sigue un orden secuencial, y es porque aun no insertamos una resolucion. Para ello, en vez de hacer un console log, llamaremos a una funcion. En este caso, la llamaremos resolve.
+
+```const promesa = new Promise((resolve)=>{
+      resolve('Hola Mundo');
+    });
+```
+
+Ahora es cuando instanciamos un procedimiento asincrono, y es que llamaremos a la promesa, y luego (**_then_**) imprimiremos por consola. Esto lo haremos antes del fin del init.
+
+```
+  ngOnInit(): void {
+
+    const promesa = new Promise((resolve)=>{
+      resolve('Hola Mundo');
+    });
+
+    promesa.then(()=>{
+      console.log('Termino la promesa')
+    })
+
+    console.log('fin del Init')
+  }
+```
+
+Si revisamos la consola, veremos que la promesa toma tiempo para ser ejecutada.  
+Las promesas nos permiten manejar errores durante el tiempo de ejecucion mediante la insercion de una nueva funcion en su declaracion. De esta forma, dentro de la promesa, podremos manejar dos funciones, para cuando no hay error y para cuando hay error.
+
+```const promesa = new Promise((resolve, reject) => {
+      if (true) { //condicion que verifica que no hay error
+        resolve('Hola Mundo');
+      } else {
+        reject('Algo salio mal');
+      }
+    });
+```
+
+Supongamos que hay error forzando que la funcion entre en el segundo caso (reject) ` if (false)`
+
+Ahora por consola nos arroja un error ya que en la promesa esta entrando a la segunda funcion la cual es para errores. Para evitar este error por consola, podemos manejar el error al momento de llamar a la promesa.
+
+```
+promesa
+      .then(() => {
+        console.log('Termino la promesa');
+      })
+      .catch((error) => console.log('error en mi promesa', error));
+```
+
+Comentemos el codigo anterior. Aplicaremos lo aprendido en un caso practico.  
+Vamos al sitio reqres.in  
+Aqui encontraremos respuesta a peticiones. Utilizaremos la respuesta a peticion desde la url reqres.in/api/users
+
+Crearemos una funcion llamada `getUsuarios()` el cual utilizara la funcion fetch de javascript para ingresar a la url de reqres.
+
+```
+getUsuarios(){
+  fetch('https://reqres.in/api/users').then(() =>
+      console.log('tengo la data')
 }
 ```
 
-Ahora, al cargar algun componente de pages, nuestra aplicacion si renderiza bien la plantilla ya que llama nuevamente al script custom.min.js
+Llamemos la funcion al momento de iniciar el componente (**_ngOnInit_**)
+Podriamos crear una variable en nuestro then para que retenga la respuesta para poder imprimirla.
+
+```
+getUsuarios() {
+    fetch('https://reqres.in/api/users').then((res) => console.log(res));
+  }
+```
+
+Ahora, si vamos la respuesta por consola, vemos que, si, hay respuesta, aunque, no es muy sencilla de leer, para ello, para a extraer los elementos de notacion javascript mediante la funcion `json`
+
+```
+console.log(res.json())
+```
+
+Por consola, veremos que nos imprime que hay una promesa, y es que la funcion json es una promesa, por ello, agreguemos las sentencias que conocemos para manejar promesas.
+
+```
+console.log(res.json().then((data)=>console.log(data)))
+```
+
+Con esto, ya podemos ver la data que nos responde la pagina. Pero, nosotros solo queremos los usuarios, nada mas. Entonces manipulemos nuestra respuesta. Fijemonos que lo que estamos imprimiendo es un arreglo, y nuestros datos estan en la llave data `data.data`  
+Ahora, ya teniendo claro que nuestra data esta en data.data retornemos a una variable esta data. Para ello, utilizaremos una Promesa!
+
+```
+getUsuarios() {
+    const promesa = new Promise((resolve) => {
+      fetch('https://reqres.in/api/users').then((res) =>
+        console.log(res.json().then((data) => resolve(data.data)))
+      );
+    });
+
+    return promesa;
+  }
+```
+
+Ahora, tenemos que capturar lo que devuelve la funcion getUsuarios. Para ello, utilizaremos nuevamente la funcion then.
+
+```
+this.getUsuarios().then((usuarios) => {
+      console.log(usuarios);
+    });
+
+```
