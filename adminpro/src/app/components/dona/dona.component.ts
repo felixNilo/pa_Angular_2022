@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ChartData, ChartEvent, ChartType } from 'chart.js';
+import { ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-dona',
@@ -9,20 +9,20 @@ import { ChartData, ChartEvent, ChartType } from 'chart.js';
 export class DonaComponent {
   @Input() title: string = 'Sin titulo';
 
-  public doughnutChartLabels: string[] = [
-    'Download Sales',
-    'In-Store Sales',
-    'Mail-Order Sales',
+  @Input('labels') doughnutChartLabels: string[] = [
+    'Label1',
+    'Label2',
+    'Label3',
   ];
 
-  public doughnutChartDataNumber: number[] = [300, 50, 100];
+  @Input('data') doughnutChartDataNumbers: number[] = [300, 50, 100];
 
   public doughnutChartData: ChartData<'doughnut'> = {
     labels: this.doughnutChartLabels,
     datasets: [
       {
         label: 'My First Dataset',
-        data: this.doughnutChartDataNumber,
+        data: this.doughnutChartDataNumbers,
         //backgroundColor: ['#1D0FC5', '#EF0000', '#24C102'],
         //hoverBackgroundColor: ['#4B41C2', '#EE3333', '#57BB46'],
         hoverOffset: 1,
