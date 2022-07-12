@@ -1,63 +1,86 @@
 # Programacion de aplicaciones 2022
 
-## Crearemos un nuevo componente de nombre RxJs.
+## Crearemos un observable de forma manual
 
-Al igual que las promesas, este componente debe poder ser accesado desde el menu y desde la url `rxjs`.
-
-1. `ng g c pages/rxjs --skip-tests --inline-style`
-2. Ingresar ruta en pages.routing.ts
-3. Ingresar nuevo arreglo de ruta dentro de sidebar.service.ts
-
-### Problema de estilo en opciones menu
-
-Si nos fijamos, ingresar al sistema a alguna ruta especifica de un componente, el componente cree que el mouse se ha situado encima, por lo que el color no cambia. Solucionaremos este problema y agregaremos que el color de la etiqueta se mantenga al estar dentro del componente al que le corresponde dicha etiqueta.
-
-Para solucionar el error, debemos ir al assets de estilos `custom.min.js`. Si nos fijamos, dentro de el hay codigo javascript, pero no se encuentra comentado. Este codigo hace exactamente lo mismo que lo que hace el codigo de `custom.js`, con la diferencia que en este ultimo codigo podemos encontrar comentarios que separan la funcionalidad del bloque. Entonces, buscaremos la funcion que actualiza el color de las etiquetas `<a>` en nuestra barra de la izquierda y la comentaremos.
+Esto lo trabajaremos dentro del componente Rxjs, asi es que vamos al controlador del componente y quitemos el ngOnInit ya que no lo vamos a utilizar. Aqui, crearemos una variable observable y la llamaremos para que comencemos a interiorizarnos con los observables. Realizaremos esto dentro del constructor de manera de ver lo que ocurre al momento de inicar el componente.
 
 ```
-/* // ==============================================================
-  // Auto select left navbar
-  // ==============================================================
-  $(function () {
-    var url = window.location;
-    var element = $("ul#sidebarnav a")
-      .filter(function () {
-        return this.href == url;
-      })
-      .addClass("active")
-      .parent()
-      .addClass("active");
-    while (true) {
-      if (element.is("li")) {
-        element = element.parent().addClass("in").parent().addClass("active");
-      } else {
-        break;
-      }
-    }
-  });
-  // ==============================================================
-  */
+constructor() {
+    const obs$ = new Observable((observer) => {
+      let i = 0
+      setInterval(() => {
+        i++;
+      }, 1000);
+    });
+
+    obs$.subscribe((valor) => console.log('Subscriber'));
+  }
 ```
 
-Con esto, ya no se agrega el estilo `active` a la clase de la etiqueta `<a>` de forma automatica.  
-Pasemos a agregar este `active` a los componentes que estamos renderizando.
-
-### Angular posee una opcion para agregar esto de forma automatica
-
-Podemos entregar a la etiqueta que se crea en nuestro subitem el atributo `active`. Este atributo cambia el valor de `routerLinkActive`, aunque, veremos que por defecto, puede ser que genere errores. Agreguemos el atributo `routerLinkActive` a la etiqueta `<a>` que crea nuestro item en el submenu dentro del componente sidebar.
+La funcion setInterval es una funcion de javascript que ejecuta codigo en intervalos de tiempo, en este caso, ejecuta un `console.log` cada 1000 milisegundos. Luego, la funcion subscribe llama al observable, y comienza a ejecutar el codigo del observable mientras espera que el observable retorne un valor para asignarle este valor a la variable `valor` y ejecutar la funcion flecha (lo cual hasta ahora no ocurre).
+Retornemos un valor desde el observable. Para ello, utilizaremos la funcion `next` propia de los observables.
 
 ```
-<a [routerLink]="subMenuItem.url" routerLinkActive="active">{{
-                subMenuItem.titulo
-              }}</a>
+const obs$ = new Observable((observer) => {
+      let i = 0;
+      setInterval(() => {
+        i++;
+        console.log('emitting');
+        observer.next(i);
+      }, 1000);
+    });
 ```
 
-Con esto vemos que funciona, pero la etiqueta Main se queda seleccionada. Esto es porque parcialmente la ruta vacia (` `) hace match con el routerLinkActive, entonces, debemos agregar un atributo de opciones para este link que indique que la ruta debe ser exacta. Para ello, utilizamos `[routerLinkActiveOptions]` y le entregamos un objeto que contenga el atributo exact con un valor true.
+Hasta aqui, ya estamos recibiendo un valor, podriamos imprimirlo por consola.
+
+`obs$.subscribe((valor) => console.log('Subscriber: ', valor));`
+
+Lo mas interesante, es que si cambiamos de componentes, el observable se sigue ejecutando en memoria. Ahora, si volvemos a inicializar el componente que hace el llamado al observable, tendremos dos observables ejecutando el proceso. Ya podemos ver que el observable puede traernos problemas de memoria, entonces, detendremos el observable cuando el valor de i llega a 5. Antes, es importante saber que setInterval se detiene con la funcion `clearInterval`, aunque, para esto, setInterval debe estar instanciado por una variable.
 
 ```
-<a [routerLink]="subMenuItem.url" routerLinkActive="active" [routerLinkActiveOptions] = "{exact : true}">{{
-                subMenuItem.titulo
-              }}</a>
+const obs$ = new Observable((observer) => {
+      let i = 0;
+      const interval = setInterval(() => {
+        i++;
+        observer.next(i);
+        if (i === 5) {
+          clearInterval(interval);
+          observer.complete();
+        }
+      }, 1000);
+    });
 ```
 
-Con ello, deberiamos ver la aplicacion como estabamos esperando.
+De esta forma, vemos que la funciona `complete` del observable detiene la ejecucion del observable.  
+Desde nuestro suscriptor del observable se pueden manejar errores e informacion proveniente del observable.
+
+```
+obs$.subscribe(
+      (valor) => console.log('Subscriber: ', valor),
+      (error) => console.error('Error ', error),
+      () => console.info('Obs terminado '));
+```
+
+Aunque, **ojo**, esta sintaxis en los ultimas versiones de javascript se encuentra deprecada. De esta forma, la nueva sintaxis recomendada es la siguiente:
+
+```
+obs$.subscribe({
+      next: (valor) => console.log('Subs: ', valor),
+      error: (error) => console.error('Error: ', error),
+      complete: () => console.info('Obs complete'),
+    });
+```
+
+Disparemos un error desde nuestro observable.
+
+```
+if (i === 5) {
+          clearInterval(interval);
+          observer.complete();
+        }
+        if( i === 2){
+          observer.error('i llego a 2');
+        }
+```
+
+Como se puede apreciar, el error tambien detiene la ejecucion del observable.
