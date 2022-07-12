@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ComponentsModule } from '../components/components.module';
 import { PromesasComponent } from './promesas/promesas.component';
+import { RxjsComponent } from './rxjs/rxjs.component';
 //import { AppRoutingModule } from '../app-routing.module';
 
 @NgModule({
@@ -18,6 +19,7 @@ import { PromesasComponent } from './promesas/promesas.component';
     Grafica1Component,
     PagesComponent,
     PromesasComponent,
+    RxjsComponent,
   ],
   exports: [
     DashboardComponent,
