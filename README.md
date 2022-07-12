@@ -1,42 +1,33 @@
 # Programacion de aplicaciones 2022
 
-## Un observable se puede especificar en terminos de lo que retorna
+## Utilicemos los observables que nos entrega rxjs por defecto
 
-Por defecto, el Observable puede o no retornar algo **desconocido**, pero nosotros podriamos especificar que es lo que retornara mediante la siguiente sintaxis `Observable<number>`, lo cual indica, en este caso, que retornara un numero.
-
-### Empaquetemos el observable
-
-Dispongamos nuestra definicion de observable dentro de una funcion que retorne el observable:
+El codigo que hemos creado hasta ahora busca ejecutar codigo entre intervalos de tiempo. Angular, nos entrega este tipo de funciones observables por defecto. Podriamos importar desde rxjs la funcion `interval`: `import { Observable, retry, interval } from 'rxjs';`
+Utilizaremos esta funcion que hemos importado en una nueva funcion:
 
 ```
-retornaObservable(){
-    let i = 0;
-    const obs$ = new Observable<number>((observer) => {
-      const interval = setInterval(() => {
-        i++;
-        observer.next(i);
-        if (i === 5) {
-          clearInterval(interval);
-          observer.complete();
-        }
-        if (i === 2) {
-          console.log('llego a 2');
-          i = 0;
-          observer.error('i llego a 2');
-          clearInterval(interval);
-        }
-      }, 1000);
-    });
-    return obs$;
+retornaIntervalo(){
+    const intervalo$ = interval(1000);
+    return intervalo$;
   }
 ```
 
-O podriamos especificar mas aun que tipo de funcion es:
+Podemos ver que esta funcion es de tipo observable.
+Ahora, en el constructor, nos suscribiremos a este observable e imprimiremos por consola lo que nos devuelve. Comentemos el codigo anterior para no generar confusion.
 
 ```
-retornaObservable(): Observable<number>{...}
+this.retornaIntervalo().subscribe((valor) => console.log(valor));
 ```
 
-Solo nos queda llamar a esta funcion: `this.retornaObservable().pipe(...)`
+Vemos que la funcion retorna un numero de forma indefinida. Ahora, javascript entrega la posibilidad de reducir esta sintaxis a: `this.retornaIntervalo().subscribe(console.log); ` mas, esto no es recomendable ya que el codigo se vuelve poco legible.
 
-Hasta aqui, nuestro codigo deberia estar funcionando de la misma forma que en el branch anterior.
+### Intentemos limitar el numero de veces que se ejecuta nuestro observable.
+
+Para ello podemos utilizar la funcion `take` dentro de la funcion `pipe` de igual forma como si estuvieramos utilizando `retry` de la siguiente forma: `const intervalo$ = interval(1000).pipe(take(4)); `
+
+### Manipulemos el valor que retorna interval.
+
+Tenemos que tener en cuenta que en cada interval se genera un valor, entonces, podemos tomar ese valor, manipularlo y retornarlo. Para acceder al valor podemos utilizar la funcion `map` a la misma altura que la funcion `take`: ` const intervalo$ = interval(1000).pipe(take(4), map(valor=>{return(valor+1)}));`
+
+Ahora vemos que en vez de que se retorne desde el 0, retornamos desde 0+1.  
+Esta ultima linea de codigo tambien podria ser escrita de la siguiente forma: `map((valor) =>{valor + 1;})` aunque, nuevamente, dificultamos la facil lectura del codigo.
