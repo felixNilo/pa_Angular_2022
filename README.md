@@ -1,45 +1,15 @@
 # Programacion de aplicaciones 2022
 
-## Crearemos un observable de forma manual
+## El metodo retry
 
-Esto lo trabajaremos dentro del componente Rxjs, asi es que vamos al controlador del componente y quitemos el ngOnInit ya que no lo vamos a utilizar. Aqui, crearemos una variable observable y la llamaremos para que comencemos a interiorizarnos con los observables. Realizaremos esto dentro del constructor de manera de ver lo que ocurre al momento de inicar el componente.
+Antes de comenzar a manipular nuestro observable, dejemos la inicializacion de la variable i afuera del observable. Esto nos ayudara a comprender mejor el codigo que vamos a hacer a continuacion.
+Debemos saber que la funcion retry busca reinicializar el codigo del observable tantas ves se espeficique en la invocacion de la funcion. Es importante saber que esta funcion funciona de la mano a `pipe` ya que se inserta entre le observable y el suscriptor.
 
 ```
-constructor() {
+export class RxjsComponent {
+  constructor() {
+    let i = 0;
     const obs$ = new Observable((observer) => {
-      let i = 0
-      setInterval(() => {
-        i++;
-      }, 1000);
-    });
-
-    obs$.subscribe((valor) => console.log('Subscriber'));
-  }
-```
-
-La funcion setInterval es una funcion de javascript que ejecuta codigo en intervalos de tiempo, en este caso, ejecuta un `console.log` cada 1000 milisegundos. Luego, la funcion subscribe llama al observable, y comienza a ejecutar el codigo del observable mientras espera que el observable retorne un valor para asignarle este valor a la variable `valor` y ejecutar la funcion flecha (lo cual hasta ahora no ocurre).
-Retornemos un valor desde el observable. Para ello, utilizaremos la funcion `next` propia de los observables.
-
-```
-const obs$ = new Observable((observer) => {
-      let i = 0;
-      setInterval(() => {
-        i++;
-        console.log('emitting');
-        observer.next(i);
-      }, 1000);
-    });
-```
-
-Hasta aqui, ya estamos recibiendo un valor, podriamos imprimirlo por consola.
-
-`obs$.subscribe((valor) => console.log('Subscriber: ', valor));`
-
-Lo mas interesante, es que si cambiamos de componentes, el observable se sigue ejecutando en memoria. Ahora, si volvemos a inicializar el componente que hace el llamado al observable, tendremos dos observables ejecutando el proceso. Ya podemos ver que el observable puede traernos problemas de memoria, entonces, detendremos el observable cuando el valor de i llega a 5. Antes, es importante saber que setInterval se detiene con la funcion `clearInterval`, aunque, para esto, setInterval debe estar instanciado por una variable.
-
-```
-const obs$ = new Observable((observer) => {
-      let i = 0;
       const interval = setInterval(() => {
         i++;
         observer.next(i);
@@ -47,40 +17,33 @@ const obs$ = new Observable((observer) => {
           clearInterval(interval);
           observer.complete();
         }
+        if (i === 2) {
+          observer.error('i llego a 2');
+        }
       }, 1000);
     });
-```
 
-De esta forma, vemos que la funciona `complete` del observable detiene la ejecucion del observable.  
-Desde nuestro suscriptor del observable se pueden manejar errores e informacion proveniente del observable.
-
-```
-obs$.subscribe(
-      (valor) => console.log('Subscriber: ', valor),
-      (error) => console.error('Error ', error),
-      () => console.info('Obs terminado '));
-```
-
-Aunque, **ojo**, esta sintaxis en los ultimas versiones de javascript se encuentra deprecada. De esta forma, la nueva sintaxis recomendada es la siguiente:
-
-```
-obs$.subscribe({
+    obs$.pipe(retry()).subscribe({
       next: (valor) => console.log('Subs: ', valor),
       error: (error) => console.error('Error: ', error),
       complete: () => console.info('Obs complete'),
     });
+  }
+}
 ```
 
-Disparemos un error desde nuestro observable.
+Con esto, vemos que nuestra aplicacion no nos lanza un error y esto es porque retry esta por defecto intentando ejecutar el codigo del observable hasta que este llegue a la funcion complete. De hecho, pasa por el error, pero lo salta. Puede comprobar esto imprimiendo por consola que i ha llegado a 2 `console.log('i llego a 2');`  
+Supongamos que el tenemos varios errores durante la ejecucion del observable.
+
+Para ello, podriamos darle un valor de 0 a la variable i cuando esta llegue al valor 2.
 
 ```
-if (i === 5) {
-          clearInterval(interval);
-          observer.complete();
-        }
-        if( i === 2){
+if (i === 2) {
+          i = 0;
           observer.error('i llego a 2');
         }
 ```
 
-Como se puede apreciar, el error tambien detiene la ejecucion del observable.
+Ahora, el retry intenta infinitas veces llegar al complete. Podemos limitar las veces que se reintenta llegar al complete entregandole un valor a la funcion retry. Por ejemplo, para intentarlo solo 1 vez mas: `retry(1)`  
+Si bien, no se reintenta, el observable sigue entregando respuesta y esto es porque la funcion setInterval aun sigue ejecutandose. Para ello, luego del error, podriamos agregar nuevamente el codigo `clearInterval(interval);`
+De esta forma, podriamos reintentar cierta ejecucion de algun observable las veces que estimemos conveniente, aunque, se recomienda manejar errores en vez de reintentar.
