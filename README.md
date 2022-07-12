@@ -52,7 +52,7 @@ Podemos entregar a la etiqueta que se crea en nuestro subitem el atributo `activ
               }}</a>
 ```
 
-Con esto vemos que funciona, pero la etiqueta Main se queda seleccionada. Esto es porque parcialmente la ruta vacia (` `) hace match con el routerLinkActive, entonces, debemos agregar un atributo de opciones para este link que indique la ruta debe ser exacta. Para ello, utilizamos `[routerLinkActiveOptions]` y le entregamos un objeto que contenga el atributo exact con un valor true.
+Con esto vemos que funciona, pero la etiqueta Main se queda seleccionada. Esto es porque parcialmente la ruta vacia (` `) hace match con el routerLinkActive, entonces, debemos agregar un atributo de opciones para este link que indique que la ruta debe ser exacta. Para ello, utilizamos `[routerLinkActiveOptions]` y le entregamos un objeto que contenga el atributo exact con un valor true.
 
 ```
 <a [routerLink]="subMenuItem.url" routerLinkActive="active" [routerLinkActiveOptions] = "{exact : true}">{{
