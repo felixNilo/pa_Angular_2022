@@ -1,42 +1,47 @@
 # Programacion de aplicaciones 2022
 
-## Supongamos que nuestro observable itera hasta el valor de 10
+## A veces tendremos que mantener vivo el observable hasta cierto tiempo
 
-Pero esta vez en intervalos de 500 ms.
+Volvamos a donde comenzamos, es decir, que nuestro observable se ejecute infinitamente.
 
 ```
-retornaIntervalo() {
+ retornaIntervalo() {
     const intervalo$ = interval(500).pipe(
-      take(10),
-      map((valor) => {
-        return valor + 1;
-      })
-    );
-    return intervalo$;
-  }
-```
-
-Ahora, solo queremos los datos para retornos de numeros pares. Aqui es donde podemos utilizar la funcion `filter`. Primero debemos tener claro que para verificar si un numero es par o no es par debemos verificar el resto que se obtiene tras dividir el numero en 2, si el resto es 1 entonces no es par, mientras que si el resto es 0 entonces si es par (division sintetica => %)
-
-De esta forma, `filter` se podria escribir de la siguiente forma: `filter(valor => (valor % 2 === 0)? true: false)`. Como vemos, al igual que map, se crea una variable que guardara el valor, pero, esta vez, no creamos un bloque de codigo, mas bien, directamente debemos verificar, cuando se retorna (true) y cuando no (false). Por ejemplo, si nuestro codigo fuera: `filter((valor) => true)` simplemente no filtraria nada, y si en vez de true fuera false, no dejaria pasar nada.
-
-### La importancia del take.
-
-Intente mover la funcion `take(10)` despues de realizar el filtro.
-
-```
-retornaIntervalo() {
-    const intervalo$ = interval(500).pipe(
+      //take(10),
       map((valor) => {
         return valor + 1;
       }),
-      filter((valor) => (valor % 2 === 0 ? true : false)),
-      take(10)
+      filter((valor) => (valor % 2 === 0 ? true : false))
     );
     return intervalo$;
   }
 ```
 
-Ahora vemos que el valor llega a 20, y es porque `take` se ocupa de contar las veces que nuestro observable retorna valores, en este caso numericos.
+Con esto vemos que, el valor primero pasa por map, se le suma uno, y luego se filtra por numeros pares. Esto no tiene fin, de hecho, si vamos a otro componente y volvemos al componente rxjs, volvemos a instanciar un nuevo observable. Asi, podriamos tener infinitos observables durante un tiempo infinito (hasta que exista espacio de memoria que permita almacenar el tamaño del numero o la cantidad de observables).
 
-Todas estas funciones, que en la teoria se llaman operadores, estan documentados en https://reactivex.io/documentation/operators.html
+### Para detener la ejecucion del observable, podemos utilizar unsubscribe
+
+El plan; queremos que al momento de irnos a otro componente de nuestra aplicacion, detengamos la ejecucion del observable. Primero, utilicemos la funcion OnDestroy, el cual, ejecuta funciones al momento de detener un componente. Para ello, debemos de crearla al igual como se crea el ngOnInit.
+
+```
+export class RxjsComponent implements OnDestroy {
+  constructor() {...}
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
+  }
+```
+
+Si ejecutamos esto, veremos que al salir del componente rxjs nos lanza el error que esta por defecto.
+Entonces, en vez de lanzar este error, debemos de ejecutar la funcion unsubscribed, aunque, como es en el caso de clearInterval, debemos de instanciar el observable mediante una variable, para que desde esta variable apliquemos la funcion unsubscribe.
+
+```
+  public intervalSub: Subscription;
+  constructor() {
+    this.intervalSub = this.retornaIntervalo().subscribe((valor) =>
+    );
+  }
+  ngOnDestroy(): void {
+    this.intervalSub.unsubscribe();
+  }
+
+```
