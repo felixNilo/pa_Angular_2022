@@ -1,33 +1,42 @@
 # Programacion de aplicaciones 2022
 
-## Utilicemos los observables que nos entrega rxjs por defecto
+## Supongamos que nuestro observable itera hasta el valor de 10
 
-El codigo que hemos creado hasta ahora busca ejecutar codigo entre intervalos de tiempo. Angular, nos entrega este tipo de funciones observables por defecto. Podriamos importar desde rxjs la funcion `interval`: `import { Observable, retry, interval } from 'rxjs';`
-Utilizaremos esta funcion que hemos importado en una nueva funcion:
+Pero esta vez en intervalos de 500 ms.
 
 ```
-retornaIntervalo(){
-    const intervalo$ = interval(1000);
+retornaIntervalo() {
+    const intervalo$ = interval(500).pipe(
+      take(10),
+      map((valor) => {
+        return valor + 1;
+      })
+    );
     return intervalo$;
   }
 ```
 
-Podemos ver que esta funcion es de tipo observable.
-Ahora, en el constructor, nos suscribiremos a este observable e imprimiremos por consola lo que nos devuelve. Comentemos el codigo anterior para no generar confusion.
+Ahora, solo queremos los datos para retornos de numeros pares. Aqui es donde podemos utilizar la funcion `filter`. Primero debemos tener claro que para verificar si un numero es par o no es par debemos verificar el resto que se obtiene tras dividir el numero en 2, si el resto es 1 entonces no es par, mientras que si el resto es 0 entonces si es par (division sintetica => %)
+
+De esta forma, `filter` se podria escribir de la siguiente forma: `filter(valor => (valor % 2 === 0)? true: false)`. Como vemos, al igual que map, se crea una variable que guardara el valor, pero, esta vez, no creamos un bloque de codigo, mas bien, directamente debemos verificar, cuando se retorna (true) y cuando no (false). Por ejemplo, si nuestro codigo fuera: `filter((valor) => true)` simplemente no filtraria nada, y si en vez de true fuera false, no dejaria pasar nada.
+
+### La importancia del take.
+
+Intente mover la funcion `take(10)` despues de realizar el filtro.
 
 ```
-this.retornaIntervalo().subscribe((valor) => console.log(valor));
+retornaIntervalo() {
+    const intervalo$ = interval(500).pipe(
+      map((valor) => {
+        return valor + 1;
+      }),
+      filter((valor) => (valor % 2 === 0 ? true : false)),
+      take(10)
+    );
+    return intervalo$;
+  }
 ```
 
-Vemos que la funcion retorna un numero de forma indefinida. Ahora, javascript entrega la posibilidad de reducir esta sintaxis a: `this.retornaIntervalo().subscribe(console.log); ` mas, esto no es recomendable ya que el codigo se vuelve poco legible.
+Ahora vemos que el valor llega a 20, y es porque `take` se ocupa de contar las veces que nuestro observable retorna valores, en este caso numericos.
 
-### Intentemos limitar el numero de veces que se ejecuta nuestro observable.
-
-Para ello podemos utilizar la funcion `take` dentro de la funcion `pipe` de igual forma como si estuvieramos utilizando `retry` de la siguiente forma: `const intervalo$ = interval(1000).pipe(take(4)); `
-
-### Manipulemos el valor que retorna interval.
-
-Tenemos que tener en cuenta que en cada interval se genera un valor, entonces, podemos tomar ese valor, manipularlo y retornarlo. Para acceder al valor podemos utilizar la funcion `map` a la misma altura que la funcion `take`: ` const intervalo$ = interval(1000).pipe(take(4), map(valor=>{return(valor+1)}));`
-
-Ahora vemos que en vez de que se retorne desde el 0, retornamos desde 0+1.  
-Esta ultima linea de codigo tambien podria ser escrita de la siguiente forma: `map((valor) =>{valor + 1;})` aunque, nuevamente, dificultamos la facil lectura del codigo.
+Todas estas funciones, que en la teoria se llaman operadores, estan documentados en https://reactivex.io/documentation/operators.html
