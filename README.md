@@ -1,56 +1,41 @@
 # Programacion de aplicaciones 2022
 
-## Comencemos iniciando el servidor
+## Veremos como agregar rutas en nuestro backend
 
-Primero, creemos un archivo en la raiz de nuestro backend llamado index.js
-Dentro de el, agregemos una linea de codigo que solo imprima por consola `console.log('Hola mundo')`
+Es importante reconocer como funciona el protocolo http, el cual, entre muchas otras funciones, nos responde con codigos ante las peticiones que se reciben desde uno o mas clientes. Para ello, se ha agregado un archivo pdf que nos indica los codigos de respuesta http.
 
-Si llamamos a este archivo utilizando node, simplemente nos dara una respuesta por consola dada por **_Hola mundo_**
+Con ello, ya podemos avanzar.
 
-`node index.js`
+### Creemos una ruta ante un get del cliente.
 
-Desde index.js vamos a llamar a instanciar express. Recuerden que hemos cambiado de programar en typescript en Angular a programar solo en javascript con express.
-
-### Importemos e inicialicemos el servidor
+Luego de instanciar la variable app, antes de levantar el servidor, configuraremos una ruta de tipo get:
 
 ```
-const express = require("express");
-
-//Instanciamos el servidor express en una variable
-const app = express();
-
-//Iniciamos el servidor en el puerto 3000 y luego, imprimimos por consola
-app.listen(3000, () => {
-  console.log("Servidor corriendo en puerto 3000");
+app.get("/", (req, res) => {
+  return res.json({
+    msje: "Primera respuesta",
+  });
 });
-
 ```
 
-Ahora, si ejecutamos nuevamente el index.js mediante node ya podriamos acceder a nuestro servidor mediante el navegador.
+Este codigo hace lo siguiente: luego de recibir un get en la ruta `/`, crea dos variables, una llamada req (de request) y res (de response), luego, retorna con la variable de respuesta (res), un archivo javascript (json) el cual contiene `msje: "Primera respuesta"`.
 
-`node index.js`
-
-Si accedemos al navegador a nuestra maquina local mediante el puerto 3000, el servidor nos respondera que no puede responder a la peticion y es que no hemos manejado ninguna peticion.
-
-Hasta aqui, cada vez que hagamos un cambio en index.js, deberiamos bajar y volver a subir el servidor, para ello, existe un framework llamado `nodemon` el cual recarga de forma automatica el servidor al detectar cambios.
-
-### Instalemos nodemon
-
-Primero, bajemos el servidor (ctrl + c) e instalemos nodemon mediante el siguiente comando:
-`npm install -g nodemon`
-
-Una vez instalado el framework, podemos utilizarlo de igual forma que node: `nodemon index.js`
-
-Si ejecutamos el comando, veremos que ahora el servicio nodemon esta ejecutando el archivo index.js, y si hacemos un cambio en index.js veremos que el servidor se reinicia automaticamente.
-
-### Configuremos un script para iniciar el servidor
-
-Vamos al archivo package.json e ingresemos un nuevo valor en el arreglo de scripts:
+Ahora, si accedemos a nuestro servidor en la ruta `/`, el servidor ejecutara el codigo de respuesta que acabamos de crear. Javascript, por defecto utilizara la variable de respuesta como elemento a retornar, de esta forma, el return podria no estar en la funcion.
 
 ```
-"scripts": {
-    "start:dev": "nodemon index.js"
-  },
+app.get("/", (req, res) => {
+  res.json({
+    msje: "Primera respuesta",
+  });
+});
 ```
 
-Ahora, cada vez que ingresemos por consola `start:dev`, la consola ejecutara `nodemon index.js`
+Si bien, a traves del navegador podemos generar comunicacion con el backend, existe software especializado para gestionar las peticiones al backend. En nuestro caso, utilizaremos Postman para gestionar nuestro backend.
+Descarguemos el software en su pagina oficial e instalemoslo.
+https://www.postman.com/downloads/?utm_source=postman-home
+
+Estando dentro de Postman, crearemos un request con la misma direccion que ingresamos por el navegador para analizar lo que podemos ver en el software. Con esto, Postman deberia respondernos lo mismo que vemos en el navegador, con la diferencia que podemos guardar la respuesta, guardar la peticion, verificar el codigo de respuesta http, el tiempo que demoro en responder, entre muchos otros elementos que iremos explorando a medida que avancemos.
+
+Desde nuestro index.js, le podemos indicar que entregue un codigo de respuesta de 400 mediante el siguiente codigo: `res.status(400).json({ msje: "Primera respuesta", });`
+
+Esta respuesta (400) indica error por mala peticion, generalmente, esto se entrega como ultima instancia desde el servidor. Dejaremos nuestro index como estaba en un principio.
