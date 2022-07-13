@@ -3,6 +3,10 @@ const express = require("express");
 //Instanciamos el servidor express en una variable
 const app = express();
 
+//Credentials
+//user: mean_user
+//pass: vKFPXQVGekO0oXYY
+
 //Rutas
 app.get("/", (req, res) => {
   res.json({
