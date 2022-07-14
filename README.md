@@ -18,3 +18,51 @@ Luego, desde mongoCompass, damos click sobre conectar, ingresamos la url, y reem
 Desde mongoAtlas, iremos a Database acces para crear un usuario llamado mean_user, el cual sera el usuario que por ahora modificara nuestra base de datos. Creelo solo con autenticacion por contraseña. Una vez tenga el usuario y la contraseña, guarde estas credenciales en el archivo index.js
 
 Conectemonos a mongoAtlas con estas nuevas credenciales.
+
+### Conectemonos desde nuestro servidor al mongoAtlas
+
+Para esto, utilizaremos mongoose.js (https://mongoosejs.com/).
+Primero, bajaremos el servido, instalaremos mongoose: `npm install mongoose` y volveremos a iniciar el servidor: `npm run start:dev`
+En nuestro directorio de backend crearemos una nueva carpeta que contendra la configuracion de conexion a nuestra base de datos. Cree una carpeta llamada database, y dentro de ella cree un archivo llamado config.js.  
+Dentro de este archivo javascript instanciaremos la conexion a la base de datos y exportaremos esa conexion. Ademas utilizaremos nuestra url de acceso que ya hemos usado para conectar compass con Atlas.
+Nuestro codigo en config deberia verse algo asi:
+
+```
+const mongoose = require("mongoose");
+const dbConnection = async () => {
+  try {
+    await mongoose.connect(
+      "mongodb+srv://mean_user:vKFPXQVGekO0oXYY@cluster0.sajs8.gcp.mongodb.net/test"
+    );
+    console.log("DB conectada");
+  } catch (error) {
+    console.log(error);
+    throw new Error("No se ha conectado a la DB");
+  }
+};
+module.exports = {
+  dbConnection,
+};
+```
+
+Aqui hay que destacar tres cosas:
+
+1. El conectarse a una base de datos requiere de procedimientos asincronos. Por esto es que, en javascript, usamos async y await, ya que, debemos indicar que proceso es asincrono mediante async, y en que momento debemos esperar respuesta con await.
+2. Este procedimiento de conectar a la base de datos, puede no ser exitoso, asi es que, debemos manejar el error cuando no se puede conectar.
+3. Exportamos el modulo mediante la funcion exports de la variable global module de javascript.
+
+Con esto claro, podemos importar el modulo que hemos importado desde config.js en nuestro index.js e iniciar la funcion dbConnection() despues de inicializar la variable express.
+
+```
+const { dbConnection } = require("./database/config");
+
+const express = require("express");
+const { dbConnection } = require("./database/config");
+
+//Instanciamos el servidor express en una variable
+const app = express();
+
+//Base de datos
+dbConnection();
+
+```
