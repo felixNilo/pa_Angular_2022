@@ -6,7 +6,12 @@ const { dbConnection } = require("./database/config");
 
 //Instanciamos el servidor express en una variable
 const app = express();
+
+//Middleware CORS
 app.use(cors());
+
+//Middleware express.json
+app.use(express.json());
 
 //Base de datos
 dbConnection();

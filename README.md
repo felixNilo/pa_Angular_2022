@@ -1,92 +1,88 @@
 # Programacion de aplicaciones 2022
 
-## ERROR MongooseServerSelectionError: connection <monitor> to...
+## Crearemos una nueva ruta para usuarios
 
-Durante la ejecucion de nuestra coneccion a la base de datos, es muy probable que el servidor en algun momento nos comience a denegar el acceso. Esto viene desde Atlas, asi es que debemos agregar una nueva direccion IP a nuestro cluster dada por 0.0.0.0.
+Esta vez, en vez de una ruta get, sera una ruta, post.
 
-## Creemos las rutas necesarias para nuestro sistema backend
-
-La idea es que, tras ingresar por ejemplo a la ruta: `/api/usuarios`, el sistema nos entregue los usuarios del sistema.  
-Ya hemos visto que la sintaxis `app.get('/')...` que vemos en index va configurando las rutas de nuestro sistema. Pero, si ingresamos todas las rutas en index.js, nuestro codigo seria muy complicado de leer al ser muy extenso.  
-Entonces, al igual que los modelos de nuestro sistema backend, crearemos un directorio para las rutas.
-Dentro de este directorio crearemos un nuevo archiv llamado usuarios.js el cual contendra todas las rutas a los servicios para el usuario.
-
-### Creando las rutas de usuario
-
-Dentro de usuarios.js importaremos Router desde express, instanciaremos Router, y tal como lo hicimos en el index, configuraremos las rutas de usuarios desde aqui solo que, en vez de utilizar el metodo get desde app, lo utilizaremos desde la instancia de Router.
-Recuerde exportar el modulo router.
+`router.post("/", createUsuario);`
+Fijese que es la misma ruta que en la peticion get, con la diferencia que es otro tipo de peticion. Para comprobar esto mediante Postman, primero, debemos crear y exportar la funcion createUsuario en el controlador de usuarios.
 
 ```
-const { Router } = require("express");
-
-const router = Router();
-
-router.get("/api/usuarios", (req, res) => {
+const createUsuario = (req, res) => {
   res.json({
-    msje: "Primera respuesta",
+    msje: "Crear usuario",
   });
-});
+};
+...
 
-module.exports = router;
+module.exports = { getUsuarios, createUsuario };
 ```
 
-Ahora, desde index debemos utilizar estas rutas en vez de configurar las rutas desde el index.  
-Entonces, en vez de configurar las rutas desde el index, utilizaremos la funcion use, de manera que, cuando nos llegue cierta peticion, repondamos con el modulo que estamos exportando desde usuarios.
+Ahora, vamos a Postman y hagamos una peticion de tipo post a la misma ruta. Deberiamos tener la respuesta:
 
 ```
-app.use("/", require("./routes/usuarios"));
+{
+    msje: "Crear usuario",
+  }
 ```
 
-Podriamos especificar mas aun este uso de rutas, de manera que solo usemos las rutas de usuarios cuando solicitemos datos de usuarios.
+Dentro de Postman vemos la opcion de modificar el body de nuestra peticion, desde aqui, podemos agregar datos junto a la peticion de manera que nuestro controlador pueda recibir dicha informacion. De esta forma, simulamos que estamos enviando informacion desde, por ejemplo, un formulario. Por ejemplo, si vamos a body, y luego a la opcion raw, podemos insertar un objeto de tipo JSON que contenga la informacion necesaria de un usuario:
 
 ```
-app.use("/api/usuarios", require("./routes/usuarios"));
-```
-
-De esta forma, en nuestra configuracion de rutas de usuarios, solo daremos respuesta ante rutas vacias:
-
-```
-router.get("/", (req, res) => {
-  res.json({
-    msje: "Primera respuesta",
-  });
-});
-```
-
-Ahora, si hacemos una peticion get a la ruta /api/usuarios, nuestro servidor nos respondera el mensaje: **_Primera respuesta_**.
-
-### Ordenemos nuestro enrutador de usuarios
-
-Ya nos podemos imaginar que dentro del archivo de rutas de usuarios, tendriamos que manejar la data que que deberiamos devolver tras peticiones, por ello, es recomendable que esta respuesta ante peticiones se realice fuera del enrutador.
-
-Para ello, creemos una carpeta de controladores en la raiz de nuestro backend y dentro de la carpeta, creemos un archivo llamado usuarios.js el cual retornara datos tras recibir peticiones desde el enrutador.  
-De esta forma, la funcion:
-
-```
-(req, res) => {
-  res.json({
-    msje: "Primera respuesta",
-  });
+{
+    "nombre": "Felix",
+    "password": "12345",
+    "email":"felix@mail.com"
 }
 ```
 
-sera realizada por una funcion dentro del controlador usuarios.js
+### Recibamos el body proveniente del cliente
+
+Para recibir la data en nuestro backend debemos incluir un nuevo middleware dado por la funcion json de express.
+
+```//Middleware express.json
+app.use(express.json());
+```
+
+Con esto, toda peticion sera pasada por la funcion json() antes de entrar a las rutas.
+Ahora, desde nuestro controlador, imprimamos por consola el body de la variable de peticion **_req_**.
 
 ```
-const getUsuarios = (req, res) => {
+const createUsuario = (req, res) => {
+  console.log(req.body);
   res.json({
-    msje: "Primera respuesta",
+    msje: "Crear usuario",
   });
 };
-module.exports = { getUsuarios };
 ```
 
-Fijese que estamos exportando un objeto que contiene la funcion getUsuarios, y es que, mas adelante, vamos a exportar mas funciones aparte de getUsuarios.
+Con esto, si hacemos una peticion POST a la ruta `/` deberiamos ver por consola el body de dicha peticion.
 
-Ahora, desde el enrutador debemos hacer uso de esta funcion tal como lo hemos hecho en ocasiones anteriores. Primero, importamos la funcion desde controllers y luego la usamos en el enrutador.
+Ya tenemos la informacion, extraigamos los datos desde el body:
+` const {email, password, nombre} = req.body;`
+
+Usemos el modelo que hemos creado para cargar los datos y subirlos con mongoose. En este punto, hay que recordar, que, al igual que la funcion que se conecta a la base de datos, la funcion para guardar un dato en Atlas es una promesa, la cual toma tiempo para ser ejecutada. Por esto, declararemos asincrona la funcion que sube el dato y haremos await al momento de subir el documento de usuario.
 
 ```
-const { getUsuarios } = require("../controllers/usuarios");
+const Usuario = require('../models/usuario');
 ...
-router.get("/", getUsuarios);
+const createUsuario = async (req, res) => {
+  //console.log(req.body);
+  const {email, password, nombre} = req.body;
+
+  const usuario = new Usuario(req.body);
+  await usuario.save();
+
+  res.json({
+    msje: "Usuario creado",
+    usuario
+  });
+};
 ```
+
+En este caso, hemos utilizado el body en su completitud para subir el documento a mongo Atlas, y al momento de crearlo, se responde con un json que entrega un elemento msje y el usuario creado.
+Si intentamos subir la misma data, por consola deberiamos ver un error de mongoAtlas, y es que estamos duplicando la llave email.
+
+Si revisamos mongoCompass o mongoAtlas, deberiamos ver la base de datos test, una nueva coleccion llamada usuarios y un documento el cual es el que acabamos de crear. El nombre de la base de datos se creo segun la url de conexion que hemos usado para conectarnos a mongoAtlas.
+
+De manera de practicar y verificar la funcionalidad de crear modelos, borre el documento desde mongoAtlas o mongoCompass para enviar una nueva peticion post agregando un atributo que no este en el modelo. Vera que a pesar de enviar elementos que no estan en el modelo, mientras se envien los datos que son requeridos (**_required_**) mongo creara el documento segun los datos del modelo.
