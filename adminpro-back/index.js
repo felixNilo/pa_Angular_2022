@@ -12,11 +12,7 @@ app.use(cors());
 dbConnection();
 
 //Rutas
-app.get("/", (req, res) => {
-  res.json({
-    msje: "Primera respuesta",
-  });
-});
+app.use("/api/usuarios", require("./routes/usuarios"));
 
 //Iniciamos el servidor en el puerto 3000 y luego, imprimimos por consola
 app.listen(process.env.PORT, () => {
