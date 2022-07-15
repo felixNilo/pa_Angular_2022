@@ -25,10 +25,11 @@ router.put("/:id", [
     check("nombre", "El nombre es obligatorio").not().isEmpty(),
     check("email", "El email es obligatorio").not().isEmail(),
     check("role", "El rol es obligatorio").not().isEmpty(),
+    validarCampos,
 ], actualizarUsuario);
 ```
 
-Aun no llamamos a la funcion que se ocupara de filtrar estos errores ya que primero debemos verificar si existe el id en nuestra base de datos.
+Ahora debemos verificar si existe el id en nuestra base de datos.
 
 ### Avancemos con el controlador.
 
