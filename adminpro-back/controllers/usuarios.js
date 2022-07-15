@@ -88,4 +88,35 @@ const actualizarUsuario = async (req, res = response) => {
   }
 };
 
-module.exports = { getUsuarios, createUsuario, actualizarUsuario };
+const borrarUsuario = async (req, res = response) => {
+  const uid = req.params.id;
+
+  try {
+    const usuarioDB = await Usuario.findById(uid);
+
+    if (!usuarioDB) {
+      return res.status(404).json({
+        msje: "Usuario creado",
+        msje: "No existe un usuario con la id proporcionada",
+      });
+    }
+
+    await Usuario.findByIdAndDelete(uid);
+
+    res.status(200).json({
+      msje: "Usuario borrado",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msje: "Error inesperado al borrar",
+    });
+  }
+};
+
+module.exports = {
+  getUsuarios,
+  createUsuario,
+  actualizarUsuario,
+  borrarUsuario,
+};

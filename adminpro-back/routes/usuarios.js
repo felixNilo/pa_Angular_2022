@@ -6,6 +6,7 @@ const {
   getUsuarios,
   createUsuario,
   actualizarUsuario,
+  borrarUsuario,
 } = require("../controllers/usuarios");
 const { check } = require("express-validator");
 const { validarCampos } = require("../middlewares/validar-campos");
@@ -34,5 +35,7 @@ router.put(
   ],
   actualizarUsuario
 );
+
+router.delete("/:id", borrarUsuario);
 
 module.exports = router;
