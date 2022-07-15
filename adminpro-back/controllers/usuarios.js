@@ -57,15 +57,13 @@ const actualizarUsuario = async (req, res = response) => {
       });
     }
 
-    const campos = req.body;
+    //Separar password, google y email de campos y almacenar los valores por separado
+    const { password, google, email, ...campos } = req.body;
 
-    if (usuarioDB.email === req.body.email) {
-      //El usuario no esta cambiando su email, asi es que, para no sobreescribir el email, lo borramos
-      delete campos.email;
-    } else {
+    if (usuarioDB.email !== email) {
       //El usuario esta cambiando su email
       //Verificar si el email que queremos ingresar no existe en la base de datos
-      const existeEmail = await Usuario.findOne({ email: req.body.email });
+      const existeEmail = await Usuario.findOne({ email: email });
       if (existeEmail) {
         return res.status(400).json({
           msje: "Ya existe un usuario con el email",
@@ -73,9 +71,7 @@ const actualizarUsuario = async (req, res = response) => {
       }
     }
 
-    delete campos.password;
-    delete campos.google;
-
+    campos.email = email;
     const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, {
       new: true,
     });
