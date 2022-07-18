@@ -1,93 +1,134 @@
 # Programacion de aplicaciones 2022
 
-## Un token sirve para verificar la sesion del usuario de forma pasiva
+## Validemos las rutas con el token generado
 
-Un token basicamente es un string key que enlaza la sesion con un usuario de manera de disminuir la carga del servidor al mantener una sesion activa.
+Primero, debemos dejar claro que todas las rutas que deberian ser sensibles al rol del usuario deberian contener el token, o mas bien, el token deberia ser comunicado en algun lugar de la peticion.  
+Usaremos el header de la peticion para guardar el token.
+Primero, generaremos un middleware que valide el token. Para ello, crearemos un archivo en middlewares llamado validarJWT. En este archivo tendremos la funcion que valide el JWT, el cual, debe leer el header de la peticion en algun atributo. Podriamos llamarle al atributo que contendra el token **_x-token_**.
 
-Revisemos como funciona en su pagina oficial -> jwt.io
+```
+const validarJWT = (req, res, next) => {
+  //Leer token
+  const token = req.header("x-token");
 
-El token posee un header, un payload y la firma, todo en forma de un string codificado. **OJO**, esta codificacion se puede decodificar en el cliente por lo que el payload debe ser informacion NO sensible, el nombre del usuario, el id, u otro. Ademas, debido a que la firma tambien se puede decodificar, esta debe contener un codigo secreto creado por nosotros de manera de que si alguien intenta decodificar ese numero secreto, este numero se encuentre cifrado en alguna otra base numerica.
+  console.log(token);
 
-### Partamos generando un token
+  next();
+};
 
-Un token debe generarse en varios lugares, asi es que generaremos una funcion que entregue un token en un archivo compartido de nuestro servidor. De esta forma, crearemos una carpeta llamada helpers, dentro de ella estara el archivo jwt.js el cual contendra la importacion de jsonwebtoken y la generacion del token.
-Primero, debemos instalar el paquete para que podamos consumir sus funciones y metodos. `npm install jsonwebtoken`.
-Luego en nuestro archivo jwt.js generaremos el siguiente codigo.
+module.exports = {
+  validarJWT,
+};
+```
+
+Ahora, llamemos el middleware cuando solicitemos lo usuarios para verificar que estamos accediendo al valor x-token. Por ello, en postman, solicitaremos la funcion get para obtener los usuarios y agregaremos al header el atributo x-token con algun valor arbitrario.
+
+Llamemos el middleware:
+
+```
+router.get("/", validarJWT, getUsuarios);
+```
+
+Ahora, generemos el llamado de la funcion getUsuarios agregando al header el atributo **_x-token_**
+
+Por consola, deberiamos poder ver que nuestro atributo en el header esta siendo leido.
+
+### Filtremos cuando no exista un token
+
+Simplemente, debemos filtrar cuando no haya un token. En dicho caso, responderemos con un error 404 y un mensaje que indique que no hay token.
+
+```
+if(!token){
+    return res.status(401).json({
+        msje: "No hay token"
+    })
+  }
+```
+
+Luego de ello, debemos verificar la validez del token, para ello, usaremos la funcion verify de jwt el cual requiere del token que queremos verificar y la clave que hemos generado en el entorno. Como esto puede generar un error (en el caso que el token no sea valido), esto debe estar dentro de un try catch. Ahora, en el caso que la funcion verify, valide el token, nos entregara el payload, el cual contiene la id del usuario.
 
 ```
 const jwt = require("jsonwebtoken");
 
-const generarJWT = (uid) => {
-  const payload = {
-    uid,
-  };
-  jwt.sign(payload, JWT_SECRET);
+const validarJWT = (req, res, next) => {
+  //Leer token
+  const token = req.header("x-token");
+
+  if (!token) {
+    return res.status(401).json({
+      msje: "No hay token",
+    });
+  }
+
+  try {
+    const { uid } = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(uid);
+  } catch (error) {
+    return res.status(401).json({
+      msje: "Token no valido",
+    });
+  }
+
+  next();
+};
+
+module.exports = {
+  validarJWT,
 };
 
 ```
 
-Como mencionamos, debemos incluir algun codigo secreto que sea accesible solo por nosotros, por ello, iremos al nuestras variables de entorno para crear una clave secreta que sea accesible por el archivo jwt.js
+Probemos nuestra funcion pasandole a nuestro header un token invalido y un token valido.
 
-`JWT_SECRET = HasfAASFlonong$594>?gajjgna@25fa?-`
+### Agreguemos un atributo a la request cuando el token sea valido
 
-Con esto, ya podemos acceder al codigo secreto. Podriamos indicar que el token cada 24 horas expire. Es importante saber que la funcion sign de jwt puede generar errores debido a desconecciones o que simplemente nuestro backend tenga en cola multiples solicitudes de generacion de tokens. Por ello, es recomendable que el generar token se realice dentro de promesas. Por ello, migraremos la funcion de generar tokens dentro del retorno de una promesa de manera de manejar errores y avisar cuando todo este okey.
+Suponiendo que el token es valido, podriamos agregar la id del usuario a la request de manera que podamos recuperar la id en otro controlador. Ademas, para hacer el codigo mas limpio, podriamos agregar el next luego de generar el codigo indicado anteriormente.
 
 ```
-const generarJWT = (uid) => {
-  return new Promise((resolve, reject) => {
-    const payload = {
-      uid,
-    };
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "24h",
-      },
-      (err, token) => {
-        if (err) {
-          console.log(err);
-          reject("No se pudo generar el JWT");
-        } else {
-          resolve(token);
-        }
-      }
-    );
+try {
+    const { uid } = jwt.verify(token, process.env.JWT_SECRET);
+    //console.log(uid);
+    req.uid = uid;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      msje: "Token no valido",
+    });
+  }
+```
+
+Con esto, ya podemos saber que usuario esta haciendo peticiones ya que tendremos registrada la id del usuario en la peticion. Compruebe ello imprimiendo la id del usuario cuando se envian los usuarios en la funcion getUsuarios.
+
+```
+const getUsuarios = async (req, res) => {
+  const usuarios = await Usuario.find({}, "nombre email");
+
+  res.json({
+    msje: "usuarios",
+    usuarios,
+    uid: req.uid
   });
 };
 ```
 
-Recuerde exportar la funcion para que pueda ser usada desde algun controlador.
-
-### Usemos nuestro generador de tokens
-
-Desde la funcion de login en auth llamaremos a la funcion generarJWT y la entregaremos el id del usuario. Para verificar, podriamos imprimir el token en la respuesta http.
+Realicemos lo mismo al momento de actualizar el usuario. Claro esta que, si no hay token, nisiquiera deberiamos verificar si hay errores en los campos, asi es que validamos el token primero que todo.
 
 ```
-//Generar Token JWT
-    const token = await generarJWT(usuarioDB._id);
-
-    res.status(200).json({
-      token,
-    });
+router.put(
+  "/:id",
+  [
+    validarJWT,
+    check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("email", "El email es obligatorio").not().isEmail(),
+    check("role", "El rol es obligatorio").not().isEmpty(),
+    validarCampos,
+  ],
+  actualizarUsuario
+);
 ```
 
-Entonces, luego de logearnos de forma correcta, se creara un token y lo podremos ver en postman. Este token podemos pegarlo en la pagina jwt.io para ver su contenido.
-
-### Generemos un token al momento de crear el usuario
-
-Al igual que cuando nos logeamos, queremos quedar logeados cuando creamos un usuarios, asi es que llamaremos a la funcion generar JWT al momento de crear un usuario en el controlador de crear usuario.
+Lo mismo para borrar un usuario.
 
 ```
-//Creando usuario en DB
-    await usuario.save();
-
-    //Generar Token JWT
-    const token = await generarJWT(usuario._id);
-
-    res.json({
-      msje: "Usuario creado",
-      usuario,
-      token,
-    });
+router.delete("/:id", validarJWT, borrarUsuario);
 ```

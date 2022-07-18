@@ -8,6 +8,7 @@ const getUsuarios = async (req, res) => {
   res.json({
     msje: "usuarios",
     usuarios,
+    uid: req.uid,
   });
 };
 
