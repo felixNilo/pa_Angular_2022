@@ -18,6 +18,7 @@ dbConnection();
 
 //Rutas
 app.use("/api/usuarios", require("./routes/usuarios"));
+app.use("/api/login", require("./routes/auth"));
 
 //Iniciamos el servidor en el puerto 3000 y luego, imprimimos por consola
 app.listen(process.env.PORT, () => {
