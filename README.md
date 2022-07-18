@@ -1,113 +1,93 @@
 # Programacion de aplicaciones 2022
 
-## Comenzaremos a verificar que las credenciales sean validas
+## Un token sirve para verificar la sesion del usuario de forma pasiva
 
-Crearemos una nueva ruta para el proceso de autenticar. Para ello, crearemos un nuevo archivo de rutas llamado auth.js.  
-A su vez, debemos indicar que este archivo sera el encargado de manejar las rutas en nuestro index principal del servidor. ` app.use("/api/login", require("./routes/auth"));`
+Un token basicamente es un string key que enlaza la sesion con un usuario de manera de disminuir la carga del servidor al mantener una sesion activa.
 
-Sabemos que tenemos que importar el metodo Router de express en nuestro archivo de rutas, instanciar este router en una variable, configurar los metodos para las rutas y exportar esta variable.
+Revisemos como funciona en su pagina oficial -> jwt.io
 
-```
-/*
-Path: '/api/login'
-*/
+El token posee un header, un payload y la firma, todo en forma de un string codificado. **OJO**, esta codificacion se puede decodificar en el cliente por lo que el payload debe ser informacion NO sensible, el nombre del usuario, el id, u otro. Ademas, debido a que la firma tambien se puede decodificar, esta debe contener un codigo secreto creado por nosotros de manera de que si alguien intenta decodificar ese numero secreto, este numero se encuentre cifrado en alguna otra base numerica.
 
-const { Router } = require("express");
+### Partamos generando un token
 
-const router = Router();
-
-router.post("/", []);
-
-module.exports = router;
-```
-
-Tambien debemos crear la funcion controladora para el login en nuevo archivo llamado auth.js dentro de controllers. Recuerde que la funcion debe ser asincrona, debe manejar errores, y ademas, en el controlador, debemos exportar las funciones que manejan las peticiones.
+Un token debe generarse en varios lugares, asi es que generaremos una funcion que entregue un token en un archivo compartido de nuestro servidor. De esta forma, crearemos una carpeta llamada helpers, dentro de ella estara el archivo jwt.js el cual contendra la importacion de jsonwebtoken y la generacion del token.
+Primero, debemos instalar el paquete para que podamos consumir sus funciones y metodos. `npm install jsonwebtoken`.
+Luego en nuestro archivo jwt.js generaremos el siguiente codigo.
 
 ```
-const { response } = require("express");
+const jwt = require("jsonwebtoken");
 
-const login = async (req, res = response) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      msje: "Error en el auth login",
-    });
-  }
-};
-
-module.exports = {
-  login,
+const generarJWT = (uid) => {
+  const payload = {
+    uid,
+  };
+  jwt.sign(payload, JWT_SECRET);
 };
 
 ```
 
-Con el controlador exportado, ya podemos llamarlo en el metodo post: `router.post("/", [], login);`
+Como mencionamos, debemos incluir algun codigo secreto que sea accesible solo por nosotros, por ello, iremos al nuestras variables de entorno para crear una clave secreta que sea accesible por el archivo jwt.js
 
-Para verificar que este todo okey, podriamos responder con el controlador un hola mundo mediante protocolo http.
+`JWT_SECRET = HasfAASFlonong$594>?gajjgna@25fa?-`
+
+Con esto, ya podemos acceder al codigo secreto. Podriamos indicar que el token cada 24 horas expire. Es importante saber que la funcion sign de jwt puede generar errores debido a desconecciones o que simplemente nuestro backend tenga en cola multiples solicitudes de generacion de tokens. Por ello, es recomendable que el generar token se realice dentro de promesas. Por ello, migraremos la funcion de generar tokens dentro del retorno de una promesa de manera de manejar errores y avisar cuando todo este okey.
 
 ```
-try {
+const generarJWT = (uid) => {
+  return new Promise((resolve, reject) => {
+    const payload = {
+      uid,
+    };
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "24h",
+      },
+      (err, token) => {
+        if (err) {
+          console.log(err);
+          reject("No se pudo generar el JWT");
+        } else {
+          resolve(token);
+        }
+      }
+    );
+  });
+};
+```
+
+Recuerde exportar la funcion para que pueda ser usada desde algun controlador.
+
+### Usemos nuestro generador de tokens
+
+Desde la funcion de login en auth llamaremos a la funcion generarJWT y la entregaremos el id del usuario. Para verificar, podriamos imprimir el token en la respuesta http.
+
+```
+//Generar Token JWT
+    const token = await generarJWT(usuarioDB._id);
+
     res.status(200).json({
-      msje: "Hola mundo",
+      token,
     });
-  }
 ```
 
-Una vez que verifiquemos que estemos recibiendo respuesta con una peticion POST a `/api/login` ya podemos comenzar a utilizar los middlewares para verificar que viene el email y la contraseña en nuestro post.
+Entonces, luego de logearnos de forma correcta, se creara un token y lo podremos ver en postman. Este token podemos pegarlo en la pagina jwt.io para ver su contenido.
+
+### Generemos un token al momento de crear el usuario
+
+Al igual que cuando nos logeamos, queremos quedar logeados cuando creamos un usuarios, asi es que llamaremos a la funcion generar JWT al momento de crear un usuario en el controlador de crear usuario.
 
 ```
-router.post(
-  "/",
-  [
-    check("email", "El email es obligatorio").isEmail(),
-    check("password", "El password es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
-  login
-);
-```
+//Creando usuario en DB
+    await usuario.save();
 
-Ahora, verifiquemos que esto funciona enviando un post sin datos en el body, con ello, nuestro middleware deberia responder con los mensajes que hemos configurado, mientras que, si enviamos email y password en el body, nuestro servidor deberia respondernos con un status 200 y un msje con Hola mundo.
+    //Generar Token JWT
+    const token = await generarJWT(usuario._id);
 
-### Extraigamos el email y pass del body en el controlador
-
-Al igual que los casos anteriores, debemos extraer los elementos que vienen en el body de la peticion, crear una variable de tipo modelo de Usuario y verificar:
-
-1. Que exista el usuario buscandolo por el email
-2. Si existe un usuario con el email entregado, verificar que la contraseña coincida
-3. Si la contraseña coincide debemos generar un token de usuario registrado
-
-Para realizar el segundo paso debemos desencriptar la contraseña utilizando bcrypt, asi es que, tal como en el controlador de usuarios, debemos importar bcrypt.
-
-```
-const bcrypt = require("bcrypt");
-
-...
-
-const { email, password } = req.body;
-
-  try {
-    //Verificar email
-    const usuarioDB = await Usuario.findOne({ email });
-    if (!usuarioDB) {
-      return res.status(404).json({
-        msje: "Email no encontrado",
-      });
-    }
-
-    //Verificar contraseña
-    const validPassword = bcrypt.compareSync(password, usuarioDB.password);
-    if (!validPassword) {
-      return res.status(400).json({
-        msje: "Contraseña no valida",
-      });
-    }
-
-    //Generar Token JWT (lo haremos mas adelante)
-    res.status(200).json({
-      msje: "Todo okey",
+    res.json({
+      msje: "Usuario creado",
+      usuario,
+      token,
     });
-
-  }
 ```
