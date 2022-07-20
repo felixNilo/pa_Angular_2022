@@ -1,13 +1,13 @@
 # Programacion de aplicaciones 2022
 
-## Dejemos lista la funcionalidad de crear hospital
+## Dejemos lista la funcionalidad de crear medicos
 
-Para crear un hospital, deberiamos tener un token de autenticacion, asi es que, agreguemos el middleware antes de entrar al controlador.
-`router.post("/",[validarJWT], createHospital);`
+Para crear un medico, al igual que el hospital, deberiamos tener un token de autenticacion, asi es que, agreguemos el middleware antes de entrar al controlador.
+`router.post("/",[validarJWT], createMedico);`
 
-Recuerden que el middleware `validarJWT` comparte el id del usuarios de manera que sea accesible en todo nuestro backend. Este id lo utilizaremos para crear el hospital.
+Ya sabemos que el middleware `validarJWT` comparte el id del usuario. Este id lo utilizaremos para crear el medico.
 
-Validamos que exista el nombre del hospital.
+Validamos que exista el nombre del medico. Ademas, en nuestro body, deberia ir incluido el id del hospital al que pertenece el medico, asi es que tambien deberiamos agregarlo como una validacion.
 
 ```
 router.post(
@@ -15,53 +15,43 @@ router.post(
   [
     validarJWT,
     check("nombre", "El nombre del hospital es necesario").not().isEmpty(),
+    check("hospital", "El id del hospital es necesario").not().isEmpty(),
     validarCampos,
   ],
-  createHospital
+  createMedicos
 );
-```
-
-### Vamos al controlador de hospitales
-
-Importemos el modelo de hospitales ya que lo vamos a utilizar para guardar el hospital.
-`const Hospital = require("../models/hospitales")`
-
-Para darle mas seguridad de nuestro backend, en el modelo de hospitales, podriamos agregar el atributo de requerido al usuario: `required: true,`
-
-Ahora, creemos el codigo para guardar el hospital. Recordar que esto tomara tiempo y pueden generarse errores, asi es que, debemos declara el metodo como asincrono, y crear dentro del metodo un bloque try/catch.
 
 ```
-const createHospital = async (req, res = response) => {
+
+### Vamos al controlador de medicos
+
+Importemos el modelo de medicos ya que lo vamos a utilizar para guardar el hospital.
+`const Hospital = require("../models/medicos")`
+
+Para darle mas seguridad a nuestro backend, en el modelo de medicos, podriamos agregar el atributo de requerido al usuario y al hospital: `required: true,`
+
+Ahora, creemos el codigo para guardar el medico. Recordar que esto tomara tiempo y pueden generarse errores, asi es que, debemos declara el metodo como asincrono, y crear dentro del metodo un bloque try/catch.
+
+```
+const createMedicos = async (req, res = response) => {
   const uid = req.uid;
-  const hospital = new Hospital(req.body);
+  const medico = new Medico({ usuario: uid, ...req.body });
+
   try {
-    //Aqui guardamos el hospital
+    const medicoDB = await Medico.save();
+
     res.status(200).json({
-      uid: uid,
-      msje: "createHospital",
+      msje: "createMedico",
+      medico: medicoDB,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      msje: "Error al crear el hospital",
+      msje: "Error al crear el medico",
     });
   }
 };
 ```
 
-Hasta aqui, al llamar al controlador con postman, entregandole un token de autenticacion valido, deberiamos ver el id del usuario que se ha autenticado y un mensaje. Con esto, solo queda guardar el hospital, pero antes, debemos configurar el id del usuario en el modelo. Luego de eso, podremos guardar el hospital.
-
-```
-const hospital = new Hospital({usuario:uid, ...req.body});
-try {
-    const hospitalDB = await hospital.save();
-
-    res.status(200).json({
-      msje: "createHospital",
-      hospital: hospitalDB,
-    });
-  }
-```
-
-Con esto, ya deberiamos poder crear hospitales.
+Con esto, ya deberiamos poder crear medicos.
 Verifique que lo que hemos hecho funciona correctamente.
