@@ -21,6 +21,7 @@ app.use("/api/usuarios", require("./routes/usuarios"));
 app.use("/api/login", require("./routes/auth"));
 app.use("/api/hospitales", require("./routes/hospitales"));
 app.use("/api/medicos", require("./routes/medicos"));
+app.use("/api/todo", require("./routes/todo"));
 
 //Iniciamos el servidor en el puerto 3000 y luego, imprimimos por consola
 app.listen(process.env.PORT, () => {

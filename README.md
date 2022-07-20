@@ -1,61 +1,41 @@
 # Programacion de aplicaciones 2022
 
-## Nos interiorizaremos con lo que se denomina paginacion
+## Crearemos la funcionalidad de buscar en forma general
 
-Basicamente, una paginacion es ordenar por cantidad de items cierto arreglo. De esta forma, cuando paginamos cierta peticion, ahorramos tiempo ya que limitamos la cantidad de items que retornamos al cliente.
-Como se pueden imaginar hay muchas formas de paginar. En este caso, paginaremos mediante el envio de los limites desde la url.
+La idea es que, desde la url, accedamos a cierta funcion que nos permita encontrar todo aquel elemento que contenga lo que estamos buscando.
+Por ejemplo, si ingresamos a `/api/todo/felix`, el sistema deberia entregarnos todos los documentos que contengan la palabra **_felix_**. Esto nos puede entregar informacion sensible, asi es que es necesario que se verifique el token de autenticacion para ingresar a la peticion.
 
-### Agreguemos mas registros de usuario para aplicar la paginacion
+### Repeat to learn
 
-De manera de comenzar a paginar, creemos varios usuarios para comenzar a generar nuestra paginacion al momento de retornar los usuarios del sistema.
-Una vez que creemos varios usuarios, podremos ver que al momento de hacer peticion get de usuarios, el servidor nos responde con todos los usuarios. En el caso que sean muchos usuarios el servidor podria tomar mucho tiempo en devolver todo, es por ello que se recomienda paginar.
+Realicemos todo lo necesario para que nuestro backend responda algun mensaje y lo que estamos al solicitar a la url `/api/todo/felix` mediante el metodo get. Es decir, en el caso de solicitar: `/api/todo/felix`, el servidor nos deberia responder un mensaje y **_felix_**.
 
-### Funcion limit de mongoose
+Una vez que el backend nos responde segun lo requerido anteriormente ya podemos comenzar a generar nuestra busqueda general.
 
-Con limit, podemos indicar cuantos elementos queremos que retorne las funciones de peticiones de mongo. Limitemos nuestras peticiones a 5. Es decir, siempre nos va a devolver 5 items. Ahora, desde donde deberiamos partir devolviendo items? Este valor, como hemos indicado, queremos que venga de la url, y en caso que no venga, que sea por defecto.
+### Comencemos a generar la busqueda general
 
-Con express.js es bastante sencillo realizar esto, basta con acceder al parametro de la query del request. `req.query.<parametro>`
-Entonces, si nuestra url es: `http://localhost:3000/api/usuarios?desde=5`, `req.query.desde` sera igual a **5**. Pero ese sera leido como un string, solo queda transformalo a numero mediante la funcion casting **_Number_**:
+Sabemos que para utilizar los metodos de busqueda de mongoose debemos importar los modelos. Asi es que importemos los modelos de Usuario, Hospitales y Medicos.
 
-```
-const desde = Number(req.query.desde) || 0;
-```
+Partamos buscando usuarios que contengan el string que estamos buscando.  
+Ya hemos utilizado la funcion find, aunque, esta funcion, devuelve una busqueda exacta, es decir, si un usuario se llama "Felix Nilo", solo la busqueda de **Felix Nilo** nos va a devolver el usuario de aquel nombre.
 
-Ahora que tenemos desde donde partir, podemos usar la funcion skip de mongoose para saltar items hasta la variable numerica **_desde_**.
+### Expresiones regulares
 
-### Nuestra paginacion
+Para abordar esto, usaremos expresiones regulares, la cual nos permiten filtrar mediante declaraciones. Utilizaremos la declaracion para hacer insensible la busqueda mediante la siguiente sintaxis:
 
 ```
-const usuarios = await Usuario.find({}, "nombre email").skip(desde).limit(5);
+const regex = new RegExp(busqueda, "i");
+
+  const usuarios = await Usuario.find({ nombre: regex });
 ```
 
-Podriamos agregar a la respuesta de la peticion la cantidad de usuarios que existen en la coleccion usuarios. Esto nos permitira analizar una nueva funcionalidad de Angular.
+Con esto ya podemos imprimir los usuarios que contengan nuestro string que estamos buscando.
+
+Apliquemos lo mismo para medicos y hospitales, y ademas, utilicemos la funcion Promise.all para hacer que las busquedas se realicen de forma simultanea.
 
 ```
-const getUsuarios = async (req, res) => {
-  const desde = Number(req.query.desde) || 0;
-
-  const usuarios = await Usuario.find({}, "nombre email").skip(desde).limit(5);
-
-  const total = await Usuario.count();
-
-  res.json({
-    msje: "usuarios",
-    usuarios,
-    uid: req.uid,
-    total,
-  });
-};
-```
-
-Si bien, esto funciona, podemos analizar que tenemos dos funciones await en nuestro controlador, es decir, para que se ejecute el segundo await, debe terminar de ejecutarse el primero.  
-En Angular (mas bien en EcmaScript6) existe la funcion all de Promise, la cual ejecuta promesas de forma simultanea. De esta forma, disminuimos el tiempo de ejecucion de nuestro controlador.
-
-```
-  const [usuarios, total] = await Promise.all([
-    Usuario.find({}, "nombre email").skip(desde).limit(5),
-    Usuario.count(),
+const [usuarios, hospitales, medicos] = await Promise.all([
+    Usuario.find({ nombre: regex }),
+    Hospital.find({ nombre: regex }),
+    Medico.find({ nombre: regex }),
   ]);
 ```
-
-Con esto, hemos hecho que nuestro controlador de getUsuarios retorne los usuarios paginados y de la forma mas eficiente posible.
