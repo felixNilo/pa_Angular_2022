@@ -1,134 +1,153 @@
 # Programacion de aplicaciones 2022
 
-## Validemos las rutas con el token generado
+## Pasaremos a trabajar con hospitales y medicos en nuestra BD
 
-Primero, debemos dejar claro que todas las rutas que deberian ser sensibles al rol del usuario deberian contener el token, o mas bien, el token deberia ser comunicado en algun lugar de la peticion.  
-Usaremos el header de la peticion para guardar el token.
-Primero, generaremos un middleware que valide el token. Para ello, crearemos un archivo en middlewares llamado validarJWT. En este archivo tendremos la funcion que valide el JWT, el cual, debe leer el header de la peticion en algun atributo. Podriamos llamarle al atributo que contendra el token **_x-token_**.
+### Partamos con los hospitales
 
-```
-const validarJWT = (req, res, next) => {
-  //Leer token
-  const token = req.header("x-token");
-
-  console.log(token);
-
-  next();
-};
-
-module.exports = {
-  validarJWT,
-};
-```
-
-Ahora, llamemos el middleware cuando solicitemos lo usuarios para verificar que estamos accediendo al valor x-token. Por ello, en postman, solicitaremos la funcion get para obtener los usuarios y agregaremos al header el atributo x-token con algun valor arbitrario.
-
-Llamemos el middleware:
+Ya hemos trabajado con los modelos de usuarios, asi es que ahora crearemos el modelo de hospital.
+El hospital tendra un nombre, una imagen y el usuario que creo el hospital.
 
 ```
-router.get("/", validarJWT, getUsuarios);
+const { Schema, model } = require("mongoose");
+
+const HospitalesSchema = Schema({
+  nombre: {
+    type: String,
+    required: true,
+  },
+  img: {
+    type: String,
+  },
+  usuario: {
+    type: Schema.Types.ObjectId,
+    ref: "Usuario",
+  },
+});
+
+module.exports = model("Hospital", HospitalesSchema);
 ```
 
-Ahora, generemos el llamado de la funcion getUsuarios agregando al header el atributo **_x-token_**
-
-Por consola, deberiamos poder ver que nuestro atributo en el header esta siendo leido.
-
-### Filtremos cuando no exista un token
-
-Simplemente, debemos filtrar cuando no haya un token. En dicho caso, responderemos con un error 404 y un mensaje que indique que no hay token.
+Si nos fijamos, la llave usuario del modelo hospital es de tipo ObjectId y es que, usuario guardara el id del usuario que creara el hospital.  
+Tal cual como esta nuestro modelo, al crearse un documento en la BD de hospital, se guardara dentro de una coleccion llamada hospitals. Para evitar esto, y forzar que la coleccion se llame hospitales agregaremos lo siguiente a la creacion del modelo:
 
 ```
-if(!token){
-    return res.status(401).json({
-        msje: "No hay token"
-    })
-  }
+const HospitalesSchema = Schema({
+  ...
+}, {collection: "hospitales"});
 ```
 
-Luego de ello, debemos verificar la validez del token, para ello, usaremos la funcion verify de jwt el cual requiere del token que queremos verificar y la clave que hemos generado en el entorno. Como esto puede generar un error (en el caso que el token no sea valido), esto debe estar dentro de un try catch. Ahora, en el caso que la funcion verify, valide el token, nos entregara el payload, el cual contiene la id del usuario.
+### Configuremos la ruta para acceder a los controladores de hospitales
+
+Primero, en nuestro index.js declaremos la ruta que hara uso del archivo de rutas (que aun no creamos) que enrutara a lo controladores de hospitales.
+De esta forma, en index agregamos `app.use("/api/hospitales", require("./routes/hospitales"));` y creamos el archivo de rutas de hospitales.
+Dentro del archivo de rutas de hospitales, queremos configurar rutas para crear los hospitales, obtenerlos, actualizarlos y borrarlos.
 
 ```
-const jwt = require("jsonwebtoken");
+/*
+Ruta: api/hospitales
+*/
+const { Router } = require("express");
+const { check } = require("express-validator");
+const { validarCampos } = require("../middlewares/validar-campos");
+const { validarJWT } = require("../middlewares/validar-jwt");
+const router = Router();
 
-const validarJWT = (req, res, next) => {
-  //Leer token
-  const token = req.header("x-token");
+router.get("/");
 
-  if (!token) {
-    return res.status(401).json({
-      msje: "No hay token",
-    });
-  }
+router.post("/");
 
-  try {
-    const { uid } = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(uid);
-  } catch (error) {
-    return res.status(401).json({
-      msje: "Token no valido",
-    });
-  }
+router.put("/:id");
 
-  next();
-};
+router.delete("/:id");
 
-module.exports = {
-  validarJWT,
-};
+module.exports = router;
 
 ```
 
-Probemos nuestra funcion pasandole a nuestro header un token invalido y un token valido.
+### Controlador de hospitales
 
-### Agreguemos un atributo a la request cuando el token sea valido
-
-Suponiendo que el token es valido, podriamos agregar la id del usuario a la request de manera que podamos recuperar la id en otro controlador. Ademas, para hacer el codigo mas limpio, podriamos agregar el next luego de generar el codigo indicado anteriormente.
-
-```
-try {
-    const { uid } = jwt.verify(token, process.env.JWT_SECRET);
-    //console.log(uid);
-    req.uid = uid;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      msje: "Token no valido",
-    });
-  }
-```
-
-Con esto, ya podemos saber que usuario esta haciendo peticiones ya que tendremos registrada la id del usuario en la peticion. Compruebe ello imprimiendo la id del usuario cuando se envian los usuarios en la funcion getUsuarios.
+Primero, creemos el archivo hospitales.js dentro de la carpeta controllers.
+Sabemos que para el get, deberiamos tener un controlador que devuelva los hospitales, para el post, un controlador que cree el hospital, para el put, un controlador que actualice un hospital, y para el delete un controlador que borre un hospital.
 
 ```
-const getUsuarios = async (req, res) => {
-  const usuarios = await Usuario.find({}, "nombre email");
+const { response } = require("express");
 
-  res.json({
-    msje: "usuarios",
-    usuarios,
-    uid: req.uid
+const getHospitales = (req, res = response) => {
+  res.status(200).json({
+    msje: "getHospitales",
   });
 };
+
+const createHospital = (req, res = response) => {
+  res.status(200).json({
+    msje: "createHospital",
+  });
+};
+
+const updateHospital = (req, res = response) => {
+  res.status(200).json({
+    msje: "updateHospital",
+  });
+};
+
+const deleteHospital = (req, res = response) => {
+  res.status(200).json({
+    msje: "deleteHospital",
+  });
+};
+
+module.exports = {
+  getHospitales,
+  createHospital,
+  updateHospital,
+  deleteHospital,
+};
 ```
 
-Realicemos lo mismo al momento de actualizar el usuario. Claro esta que, si no hay token, nisiquiera deberiamos verificar si hay errores en los campos, asi es que validamos el token primero que todo.
+Con esto, ya podemos llamar a nuestros controladores desde nuestro archivo de rutas de hospitales.
 
 ```
-router.put(
-  "/:id",
-  [
-    validarJWT,
-    check("nombre", "El nombre es obligatorio").not().isEmpty(),
-    check("email", "El email es obligatorio").not().isEmail(),
-    check("role", "El rol es obligatorio").not().isEmpty(),
-    validarCampos,
-  ],
-  actualizarUsuario
+router.get("/", getHospitales);
+
+router.post("/", createHospital);
+
+router.put("/:id", updateHospital);
+
+router.delete("/:id", deleteHospital);
+```
+
+### Realicemos lo mismo pero esta vez con los medicos
+
+La unica diferencia que tiene un medico con hospital es que un medico tendra asociado un hospital. De esta forma, el modelo queda:
+
+```
+const { Schema, model } = require("mongoose");
+
+const MedicoSchema = Schema(
+  {
+    nombre: {
+      type: String,
+      required: true,
+    },
+    img: {
+      type: String,
+    },
+    usuario: {
+      type: Schema.Types.ObjectId,
+      ref: "Usuario",
+    },
+    hospita: {
+      type: Schema.Types.ObjectId,
+      ref: "Hospital",
+    },
+  },
+  { collection: "medicos" }
 );
+
+module.exports = model("Medico", MedicoSchema);
+
 ```
 
-Lo mismo para borrar un usuario.
+### Repeat to learn
 
-```
-router.delete("/:id", validarJWT, borrarUsuario);
-```
+Cree el archivo de rutas para medicos y controladores para medicos. Luego pruebe que todo este respondiendo okey con postman.
