@@ -55,3 +55,10 @@ const createMedicos = async (req, res = response) => {
 
 Con esto, ya deberiamos poder crear medicos.
 Verifique que lo que hemos hecho funciona correctamente.
+
+### Id hospital testing
+
+Actualmente estamos verificando que la id del hospital se envie en el body, aunque, id puede no ser una id valida de mongo. De hecho, si se intenta enviar una id que no corresponde, el sistema se caera.  
+Para ello, utilizaremos un nuevo validador de check que justamente valida si lo que estamos leyendo es una id de mongo: `check("hospital", "El id del hospital es necesario").isMongoId(),`
+
+Actualizando esta linea de codigo, nuestro sistema se mantendra vivo!
