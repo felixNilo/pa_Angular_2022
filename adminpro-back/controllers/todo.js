@@ -26,6 +26,39 @@ const busqueda = async (req, res = response) => {
   });
 };
 
+const busquedaColeccion = async (req, res = response) => {
+  const coleccion = req.params.coleccion;
+  const busqueda = req.params.busqueda;
+  const regex = new RegExp(busqueda, "i");
+
+  let data = [];
+
+  switch (coleccion) {
+    case "medicos":
+      data = await Medico.find({ nombre: regex });
+      break;
+
+    case "hospitales":
+      data = await Hospital.find({ nombre: regex });
+      break;
+
+    case "usuarios":
+      data = await Usuario.find({ nombre: regex });
+      break;
+
+    default:
+      return res.status(400).json({
+        msje: "La coleccion no se ha encontrado",
+      });
+  }
+
+  res.status(200).json({
+    msje: "busqueda en coleccions",
+    data,
+  });
+};
+
 module.exports = {
   busqueda,
+  busquedaColeccion,
 };
